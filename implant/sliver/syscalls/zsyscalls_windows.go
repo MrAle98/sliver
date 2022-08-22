@@ -80,11 +80,16 @@ var (
 	procModule32FirstW                    = modkernel32.NewProc("Module32FirstW")
 	procPssCaptureSnapshot                = modkernel32.NewProc("PssCaptureSnapshot")
 	procQueueUserAPC                      = modkernel32.NewProc("QueueUserAPC")
+	procResumeThread                      = modkernel32.NewProc("ResumeThread")
 	procUpdateProcThreadAttribute         = modkernel32.NewProc("UpdateProcThreadAttribute")
 	procVirtualAllocEx                    = modkernel32.NewProc("VirtualAllocEx")
 	procVirtualProtectEx                  = modkernel32.NewProc("VirtualProtectEx")
 	procWriteProcessMemory                = modkernel32.NewProc("WriteProcessMemory")
+	procNtCreateSection                   = modntdll.NewProc("NtCreateSection")
+	procNtMapViewOfSection                = modntdll.NewProc("NtMapViewOfSection")
+	procNtUnmapViewOfSection              = modntdll.NewProc("NtUnmapViewOfSection")
 	procRtlCopyMemory                     = modntdll.NewProc("RtlCopyMemory")
+	procRtlCreateUserThread               = modntdll.NewProc("RtlCreateUserThread")
 	procGetProcessMemoryInfo              = modpsapi.NewProc("GetProcessMemoryInfo")
 )
 
@@ -391,6 +396,14 @@ func QueueUserAPC(pfnAPC uintptr, hThread windows.Handle, dwData uintptr) (err e
 	return
 }
 
+func ResumeThread(threadHandle windows.Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procResumeThread.Addr(), 1, uintptr(threadHandle), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func UpdateProcThreadAttribute(lpAttributeList *PROC_THREAD_ATTRIBUTE_LIST, dwFlags uint32, attribute uintptr, lpValue *uintptr, cbSize uintptr, lpPreviousValue uintptr, lpReturnSize *uintptr) (err error) {
 	r1, _, e1 := syscall.Syscall9(procUpdateProcThreadAttribute.Addr(), 7, uintptr(unsafe.Pointer(lpAttributeList)), uintptr(dwFlags), uintptr(attribute), uintptr(unsafe.Pointer(lpValue)), uintptr(cbSize), uintptr(lpPreviousValue), uintptr(unsafe.Pointer(lpReturnSize)), 0, 0)
 	if r1 == 0 {
@@ -424,8 +437,44 @@ func WriteProcessMemory(hProcess windows.Handle, lpBaseAddress uintptr, lpBuffer
 	return
 }
 
+func NtCreateSection(sectionHandle *windows.Handle, desiredAccess uint32, objectAttributes uintptr, MaximumSize *uint64, SectionPageProtection uint32, AllocationAttributes int32, FileHandle uintptr) (err error) {
+	r1, _, e1 := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(sectionHandle)), uintptr(desiredAccess), uintptr(objectAttributes), uintptr(unsafe.Pointer(MaximumSize)), uintptr(SectionPageProtection), uintptr(AllocationAttributes), uintptr(FileHandle), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func NtMapViewOfSection(sectionHandle windows.Handle, processHandle windows.Handle, baseAddress *uintptr, zeroBits uintptr, commitSize uintptr, sectionOffset *uintptr, ViewSize *uint64, InheritDisposition uint32, AllocationType uint32, Win32Protect uint32) (err error) {
+	r1, _, e1 := syscall.Syscall12(procNtMapViewOfSection.Addr(), 10, uintptr(sectionHandle), uintptr(processHandle), uintptr(unsafe.Pointer(baseAddress)), uintptr(zeroBits), uintptr(commitSize), uintptr(unsafe.Pointer(sectionOffset)), uintptr(unsafe.Pointer(ViewSize)), uintptr(InheritDisposition), uintptr(AllocationType), uintptr(Win32Protect), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func NtUnmapViewOfSection(processHandle windows.Handle, baseAddress uintptr) (err error) {
+	r1, _, e1 := syscall.Syscall(procNtUnmapViewOfSection.Addr(), 2, uintptr(processHandle), uintptr(baseAddress), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func RtlCopyMemory(dest uintptr, src uintptr, dwSize uint32) {
 	syscall.Syscall(procRtlCopyMemory.Addr(), 3, uintptr(dest), uintptr(src), uintptr(dwSize))
+	return
+}
+
+func RtlCreateUserThread(hProcess windows.Handle, SecurityDescriptor uintptr, CreateSuspended bool, StackZeroBits uint32, StackReserved uintptr, StackCommit uintptr, startaddress uintptr, StartParameter uintptr, ThreadHandle *windows.Handle, ClientID uintptr) (err error) {
+	var _p0 uint32
+	if CreateSuspended {
+		_p0 = 1
+	}
+	r1, _, e1 := syscall.Syscall12(procRtlCreateUserThread.Addr(), 10, uintptr(hProcess), uintptr(SecurityDescriptor), uintptr(_p0), uintptr(StackZeroBits), uintptr(StackReserved), uintptr(StackCommit), uintptr(startaddress), uintptr(StartParameter), uintptr(unsafe.Pointer(ThreadHandle)), uintptr(ClientID), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
 	return
 }
 

