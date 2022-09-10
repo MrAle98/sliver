@@ -284,6 +284,16 @@ const (
 	MsgCurrentTokenOwnerReq
 	// MsgCurrentTokenOwner - Replies with the current thread owner (resp to MsfCurrentToken)
 	MsgCurrentTokenOwner
+
+	MsgRportFwdStopListenerReq
+
+	MsgRportFwdStartListenerReq
+
+	MsgRportFwdListener
+
+	MsgRportFwdListeners
+
+	MsgRportFwdListenersReq
 )
 
 // Constants to replace enums
@@ -497,6 +507,15 @@ func MsgNumber(request proto.Message) uint32 {
 		return MsgCurrentTokenOwnerReq
 	case *CurrentTokenOwner:
 		return MsgCurrentTokenOwner
+
+	case *RportFwdStartListenerReq:
+		return MsgRportFwdStartListenerReq
+	case *RportFwdStopListenerReq:
+		return MsgRportFwdStopListenerReq
+	case *RportFwdListenersReq:
+		return MsgRportFwdListenersReq
+	case *RportFwdListeners:
+		return MsgRportFwdListeners
 	}
 
 	return uint32(0)

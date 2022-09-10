@@ -785,7 +785,7 @@ message PivotListener {
 
   commonpb.Response Response = 9;
 }
- 
+
 message PivotHello {
   bytes PublicKey = 1;
   int64 PeerID = 2 [jstype = JS_STRING];
@@ -1004,4 +1004,44 @@ message ListExtensions {
   repeated string Names = 1;
 
   commonpb.Response Response = 9;
+}
+
+// *** RportFwd ***
+
+
+message RportFwdStopListenerReq {
+  uint32 ID = 1;
+  
+  commonpb.Request Request = 9;
+}
+
+message RportFwdStartListenerReq {
+  string BindAddress = 1;
+  uint32 BindPort = 2;
+  uint32 forwardPort = 3;
+  string forwardAddress = 4;
+
+  commonpb.Request Request = 9;
+}
+
+message RportFwdListener {
+  uint32 ID = 1;
+  string BindAddress = 2;
+  uint32 bindPort = 3;
+  string forwardAddress =4;
+  uint32 forwardPort = 5;
+
+  commonpb.Response Response = 9;
+}
+
+
+message RportFwdListeners {
+  repeated RportFwdListener Listeners = 1;
+
+  commonpb.Response Response = 9;
+}
+
+message RportFwdListenersReq {
+
+  commonpb.Request Request = 9;
 }
