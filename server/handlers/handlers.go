@@ -44,7 +44,7 @@ func GetHandlers() map[uint32]ServerHandler {
 		sliverpb.MsgTunnelClose: tunnelCloseHandler,
 		sliverpb.MsgPing:        pingHandler,
 		sliverpb.MsgSocksData:   socksDataHandler,
-
+		sliverpb.MsgRPortfwdReq: createReverseTunnelHandler,
 		// Beacons
 		sliverpb.MsgBeaconRegister: beaconRegisterHandler,
 		sliverpb.MsgBeaconTasks:    beaconTasksHandler,
@@ -66,6 +66,7 @@ func GetNonPivotHandlers() map[uint32]ServerHandler {
 		sliverpb.MsgTunnelClose: tunnelCloseHandler,
 		sliverpb.MsgPing:        pingHandler,
 		sliverpb.MsgSocksData:   socksDataHandler,
+		sliverpb.MsgRPortfwdReq: createReverseTunnelHandler,
 
 		// Beacons - Not currently supported in pivots
 	}

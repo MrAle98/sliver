@@ -1008,7 +1008,6 @@ message ListExtensions {
 
 // *** RportFwd ***
 
-
 message RportFwdStopListenerReq {
   uint32 ID = 1;
   
@@ -1045,3 +1044,25 @@ message RportFwdListenersReq {
 
   commonpb.Request Request = 9;
 }
+
+
+message RPortfwd {
+  uint32 Port = 1;
+  int32 Protocol = 2;
+  string Host = 3;
+
+  uint64 TunnelID = 8 [jstype = JS_STRING]; // Bind to this tunnel
+    commonpb.Response Response = 9;
+
+}
+
+message RPortfwdReq {
+  uint32 Port = 1;
+  int32 Protocol = 2;
+  string Host = 3;
+
+  uint64 TunnelID = 8 [jstype = JS_STRING]; // Bind to this tunnel
+  commonpb.Request Request = 9;
+
+}
+

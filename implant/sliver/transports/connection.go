@@ -49,7 +49,7 @@ func (c *Connection) Cleanup() {
 	})
 }
 
-// Tunnel - Add tunnel to mapping
+// Tunnel - Get tunnel from mapping
 func (c *Connection) Tunnel(ID uint64) *Tunnel {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()

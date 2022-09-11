@@ -121,6 +121,21 @@ func (t *tunnels) Create(sessionID string) *Tunnel {
 	return tunnel
 }
 
+func (t *tunnels) CreateReverse(sessionID string, tunnelID uint64) *Tunnel {
+	session := Sessions.Get(sessionID)
+
+	tunnel := NewTunnel(
+		tunnelID,
+		session.ID,
+	)
+
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+	t.tunnels[tunnel.ID] = tunnel
+
+	return tunnel
+}
+
 // ScheduleClose - schedules a close for tunnel, must be called as routine.
 // will close it once there is no data for at least delayBeforeClose delay since last message
 // This is _necessary_ since we processing messages asynchronously

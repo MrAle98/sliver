@@ -9515,6 +9515,164 @@ func (x *RportFwdListenersReq) GetRequest() *commonpb.Request {
 	return nil
 }
 
+type RPortfwd struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Port     uint32             `protobuf:"varint,1,opt,name=Port,proto3" json:"Port,omitempty"`
+	Protocol int32              `protobuf:"varint,2,opt,name=Protocol,proto3" json:"Protocol,omitempty"`
+	Host     string             `protobuf:"bytes,3,opt,name=Host,proto3" json:"Host,omitempty"`
+	TunnelID uint64             `protobuf:"varint,8,opt,name=TunnelID,proto3" json:"TunnelID,omitempty"` // Bind to this tunnel
+	Response *commonpb.Response `protobuf:"bytes,9,opt,name=Response,proto3" json:"Response,omitempty"`
+}
+
+func (x *RPortfwd) Reset() {
+	*x = RPortfwd{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sliverpb_sliver_proto_msgTypes[147]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RPortfwd) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RPortfwd) ProtoMessage() {}
+
+func (x *RPortfwd) ProtoReflect() protoreflect.Message {
+	mi := &file_sliverpb_sliver_proto_msgTypes[147]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RPortfwd.ProtoReflect.Descriptor instead.
+func (*RPortfwd) Descriptor() ([]byte, []int) {
+	return file_sliverpb_sliver_proto_rawDescGZIP(), []int{147}
+}
+
+func (x *RPortfwd) GetPort() uint32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *RPortfwd) GetProtocol() int32 {
+	if x != nil {
+		return x.Protocol
+	}
+	return 0
+}
+
+func (x *RPortfwd) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *RPortfwd) GetTunnelID() uint64 {
+	if x != nil {
+		return x.TunnelID
+	}
+	return 0
+}
+
+func (x *RPortfwd) GetResponse() *commonpb.Response {
+	if x != nil {
+		return x.Response
+	}
+	return nil
+}
+
+type RPortfwdReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Port     uint32            `protobuf:"varint,1,opt,name=Port,proto3" json:"Port,omitempty"`
+	Protocol int32             `protobuf:"varint,2,opt,name=Protocol,proto3" json:"Protocol,omitempty"`
+	Host     string            `protobuf:"bytes,3,opt,name=Host,proto3" json:"Host,omitempty"`
+	TunnelID uint64            `protobuf:"varint,8,opt,name=TunnelID,proto3" json:"TunnelID,omitempty"` // Bind to this tunnel
+	Request  *commonpb.Request `protobuf:"bytes,9,opt,name=Request,proto3" json:"Request,omitempty"`
+}
+
+func (x *RPortfwdReq) Reset() {
+	*x = RPortfwdReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sliverpb_sliver_proto_msgTypes[148]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RPortfwdReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RPortfwdReq) ProtoMessage() {}
+
+func (x *RPortfwdReq) ProtoReflect() protoreflect.Message {
+	mi := &file_sliverpb_sliver_proto_msgTypes[148]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RPortfwdReq.ProtoReflect.Descriptor instead.
+func (*RPortfwdReq) Descriptor() ([]byte, []int) {
+	return file_sliverpb_sliver_proto_rawDescGZIP(), []int{148}
+}
+
+func (x *RPortfwdReq) GetPort() uint32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *RPortfwdReq) GetProtocol() int32 {
+	if x != nil {
+		return x.Protocol
+	}
+	return 0
+}
+
+func (x *RPortfwdReq) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *RPortfwdReq) GetTunnelID() uint64 {
+	if x != nil {
+		return x.TunnelID
+	}
+	return 0
+}
+
+func (x *RPortfwdReq) GetRequest() *commonpb.Request {
+	if x != nil {
+		return x.Request
+	}
+	return nil
+}
+
 type SockTabEntry_SockAddr struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -9527,7 +9685,7 @@ type SockTabEntry_SockAddr struct {
 func (x *SockTabEntry_SockAddr) Reset() {
 	*x = SockTabEntry_SockAddr{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sliverpb_sliver_proto_msgTypes[147]
+		mi := &file_sliverpb_sliver_proto_msgTypes[149]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -9540,7 +9698,7 @@ func (x *SockTabEntry_SockAddr) String() string {
 func (*SockTabEntry_SockAddr) ProtoMessage() {}
 
 func (x *SockTabEntry_SockAddr) ProtoReflect() protoreflect.Message {
-	mi := &file_sliverpb_sliver_proto_msgTypes[147]
+	mi := &file_sliverpb_sliver_proto_msgTypes[149]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10652,17 +10810,37 @@ var file_sliverpb_sliver_proto_rawDesc = []byte{
 	0x73, 0x74, 0x65, 0x6e, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x12, 0x2b, 0x0a, 0x07, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x63, 0x6f,
 	0x6d, 0x6d, 0x6f, 0x6e, 0x70, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x52, 0x07,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2a, 0x2c, 0x0a, 0x09, 0x50, 0x69, 0x76, 0x6f, 0x74,
-	0x54, 0x79, 0x70, 0x65, 0x12, 0x07, 0x0a, 0x03, 0x54, 0x43, 0x50, 0x10, 0x00, 0x12, 0x07, 0x0a,
-	0x03, 0x55, 0x44, 0x50, 0x10, 0x01, 0x12, 0x0d, 0x0a, 0x09, 0x4e, 0x61, 0x6d, 0x65, 0x64, 0x50,
-	0x69, 0x70, 0x65, 0x10, 0x02, 0x2a, 0x33, 0x0a, 0x0f, 0x50, 0x65, 0x65, 0x72, 0x46, 0x61, 0x69,
-	0x6c, 0x75, 0x72, 0x65, 0x54, 0x79, 0x70, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x53, 0x45, 0x4e, 0x44,
-	0x5f, 0x46, 0x41, 0x49, 0x4c, 0x55, 0x52, 0x45, 0x10, 0x00, 0x12, 0x0e, 0x0a, 0x0a, 0x44, 0x49,
-	0x53, 0x43, 0x4f, 0x4e, 0x4e, 0x45, 0x43, 0x54, 0x10, 0x01, 0x42, 0x2f, 0x5a, 0x2d, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x69, 0x73, 0x68, 0x6f, 0x70, 0x66,
-	0x6f, 0x78, 0x2f, 0x73, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2f, 0x73, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x9e, 0x01, 0x0a, 0x08, 0x52, 0x50, 0x6f, 0x72,
+	0x74, 0x66, 0x77, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x50, 0x6f, 0x72, 0x74, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0d, 0x52, 0x04, 0x50, 0x6f, 0x72, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x50, 0x72, 0x6f, 0x74,
+	0x6f, 0x63, 0x6f, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x50, 0x72, 0x6f, 0x74,
+	0x6f, 0x63, 0x6f, 0x6c, 0x12, 0x12, 0x0a, 0x04, 0x48, 0x6f, 0x73, 0x74, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x48, 0x6f, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x08, 0x54, 0x75, 0x6e, 0x6e,
+	0x65, 0x6c, 0x49, 0x44, 0x18, 0x08, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02, 0x30, 0x01, 0x52, 0x08,
+	0x54, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x49, 0x44, 0x12, 0x2e, 0x0a, 0x08, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x63, 0x6f, 0x6d,
+	0x6d, 0x6f, 0x6e, 0x70, 0x62, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x52, 0x08,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x9e, 0x01, 0x0a, 0x0b, 0x52, 0x50, 0x6f,
+	0x72, 0x74, 0x66, 0x77, 0x64, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x50, 0x6f, 0x72, 0x74,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x50, 0x6f, 0x72, 0x74, 0x12, 0x1a, 0x0a, 0x08,
+	0x50, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08,
+	0x50, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x12, 0x12, 0x0a, 0x04, 0x48, 0x6f, 0x73, 0x74,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x48, 0x6f, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x08,
+	0x54, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x49, 0x44, 0x18, 0x08, 0x20, 0x01, 0x28, 0x04, 0x42, 0x02,
+	0x30, 0x01, 0x52, 0x08, 0x54, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x49, 0x44, 0x12, 0x2b, 0x0a, 0x07,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e,
+	0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x70, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x52, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2a, 0x2c, 0x0a, 0x09, 0x50, 0x69, 0x76,
+	0x6f, 0x74, 0x54, 0x79, 0x70, 0x65, 0x12, 0x07, 0x0a, 0x03, 0x54, 0x43, 0x50, 0x10, 0x00, 0x12,
+	0x07, 0x0a, 0x03, 0x55, 0x44, 0x50, 0x10, 0x01, 0x12, 0x0d, 0x0a, 0x09, 0x4e, 0x61, 0x6d, 0x65,
+	0x64, 0x50, 0x69, 0x70, 0x65, 0x10, 0x02, 0x2a, 0x33, 0x0a, 0x0f, 0x50, 0x65, 0x65, 0x72, 0x46,
+	0x61, 0x69, 0x6c, 0x75, 0x72, 0x65, 0x54, 0x79, 0x70, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x53, 0x45,
+	0x4e, 0x44, 0x5f, 0x46, 0x41, 0x49, 0x4c, 0x55, 0x52, 0x45, 0x10, 0x00, 0x12, 0x0e, 0x0a, 0x0a,
+	0x44, 0x49, 0x53, 0x43, 0x4f, 0x4e, 0x4e, 0x45, 0x43, 0x54, 0x10, 0x01, 0x42, 0x2f, 0x5a, 0x2d,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x69, 0x73, 0x68, 0x6f,
+	0x70, 0x66, 0x6f, 0x78, 0x2f, 0x73, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x2f, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x2f, 0x73, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x70, 0x62, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -10678,7 +10856,7 @@ func file_sliverpb_sliver_proto_rawDescGZIP() []byte {
 }
 
 var file_sliverpb_sliver_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_sliverpb_sliver_proto_msgTypes = make([]protoimpl.MessageInfo, 148)
+var file_sliverpb_sliver_proto_msgTypes = make([]protoimpl.MessageInfo, 150)
 var file_sliverpb_sliver_proto_goTypes = []interface{}{
 	(PivotType)(0),                   // 0: sliverpb.PivotType
 	(PeerFailureType)(0),             // 1: sliverpb.PeerFailureType
@@ -10829,169 +11007,173 @@ var file_sliverpb_sliver_proto_goTypes = []interface{}{
 	(*RportFwdListener)(nil),         // 146: sliverpb.RportFwdListener
 	(*RportFwdListeners)(nil),        // 147: sliverpb.RportFwdListeners
 	(*RportFwdListenersReq)(nil),     // 148: sliverpb.RportFwdListenersReq
-	(*SockTabEntry_SockAddr)(nil),    // 149: sliverpb.SockTabEntry.SockAddr
-	(*commonpb.Response)(nil),        // 150: commonpb.Response
-	(*commonpb.Request)(nil),         // 151: commonpb.Request
-	(*commonpb.Process)(nil),         // 152: commonpb.Process
-	(*commonpb.EnvVar)(nil),          // 153: commonpb.EnvVar
+	(*RPortfwd)(nil),                 // 149: sliverpb.RPortfwd
+	(*RPortfwdReq)(nil),              // 150: sliverpb.RPortfwdReq
+	(*SockTabEntry_SockAddr)(nil),    // 151: sliverpb.SockTabEntry.SockAddr
+	(*commonpb.Response)(nil),        // 152: commonpb.Response
+	(*commonpb.Request)(nil),         // 153: commonpb.Request
+	(*commonpb.Process)(nil),         // 154: commonpb.Process
+	(*commonpb.EnvVar)(nil),          // 155: commonpb.EnvVar
 }
 var file_sliverpb_sliver_proto_depIdxs = []int32{
 	2,   // 0: sliverpb.BeaconTasks.Tasks:type_name -> sliverpb.Envelope
 	4,   // 1: sliverpb.BeaconRegister.Register:type_name -> sliverpb.Register
 	4,   // 2: sliverpb.SessionRegister.Register:type_name -> sliverpb.Register
-	150, // 3: sliverpb.OpenSession.Response:type_name -> commonpb.Response
-	151, // 4: sliverpb.OpenSession.Request:type_name -> commonpb.Request
-	150, // 5: sliverpb.CloseSession.Response:type_name -> commonpb.Response
-	151, // 6: sliverpb.CloseSession.Request:type_name -> commonpb.Request
-	150, // 7: sliverpb.Ping.Response:type_name -> commonpb.Response
-	151, // 8: sliverpb.Ping.Request:type_name -> commonpb.Request
-	151, // 9: sliverpb.KillReq.Request:type_name -> commonpb.Request
-	151, // 10: sliverpb.PsReq.Request:type_name -> commonpb.Request
-	152, // 11: sliverpb.Ps.Processes:type_name -> commonpb.Process
-	150, // 12: sliverpb.Ps.Response:type_name -> commonpb.Response
-	151, // 13: sliverpb.TerminateReq.Request:type_name -> commonpb.Request
-	150, // 14: sliverpb.Terminate.Response:type_name -> commonpb.Response
-	151, // 15: sliverpb.IfconfigReq.Request:type_name -> commonpb.Request
+	152, // 3: sliverpb.OpenSession.Response:type_name -> commonpb.Response
+	153, // 4: sliverpb.OpenSession.Request:type_name -> commonpb.Request
+	152, // 5: sliverpb.CloseSession.Response:type_name -> commonpb.Response
+	153, // 6: sliverpb.CloseSession.Request:type_name -> commonpb.Request
+	152, // 7: sliverpb.Ping.Response:type_name -> commonpb.Response
+	153, // 8: sliverpb.Ping.Request:type_name -> commonpb.Request
+	153, // 9: sliverpb.KillReq.Request:type_name -> commonpb.Request
+	153, // 10: sliverpb.PsReq.Request:type_name -> commonpb.Request
+	154, // 11: sliverpb.Ps.Processes:type_name -> commonpb.Process
+	152, // 12: sliverpb.Ps.Response:type_name -> commonpb.Response
+	153, // 13: sliverpb.TerminateReq.Request:type_name -> commonpb.Request
+	152, // 14: sliverpb.Terminate.Response:type_name -> commonpb.Response
+	153, // 15: sliverpb.IfconfigReq.Request:type_name -> commonpb.Request
 	17,  // 16: sliverpb.Ifconfig.NetInterfaces:type_name -> sliverpb.NetInterface
-	150, // 17: sliverpb.Ifconfig.Response:type_name -> commonpb.Response
-	151, // 18: sliverpb.LsReq.Request:type_name -> commonpb.Request
+	152, // 17: sliverpb.Ifconfig.Response:type_name -> commonpb.Response
+	153, // 18: sliverpb.LsReq.Request:type_name -> commonpb.Request
 	20,  // 19: sliverpb.Ls.Files:type_name -> sliverpb.FileInfo
-	150, // 20: sliverpb.Ls.Response:type_name -> commonpb.Response
-	151, // 21: sliverpb.CdReq.Request:type_name -> commonpb.Request
-	151, // 22: sliverpb.PwdReq.Request:type_name -> commonpb.Request
-	150, // 23: sliverpb.Pwd.Response:type_name -> commonpb.Response
-	151, // 24: sliverpb.RmReq.Request:type_name -> commonpb.Request
-	150, // 25: sliverpb.Rm.Response:type_name -> commonpb.Response
-	151, // 26: sliverpb.MvReq.Request:type_name -> commonpb.Request
-	150, // 27: sliverpb.Mv.Response:type_name -> commonpb.Response
-	151, // 28: sliverpb.MkdirReq.Request:type_name -> commonpb.Request
-	150, // 29: sliverpb.Mkdir.Response:type_name -> commonpb.Response
-	151, // 30: sliverpb.DownloadReq.Request:type_name -> commonpb.Request
-	150, // 31: sliverpb.Download.Response:type_name -> commonpb.Response
-	151, // 32: sliverpb.UploadReq.Request:type_name -> commonpb.Request
-	150, // 33: sliverpb.Upload.Response:type_name -> commonpb.Response
-	151, // 34: sliverpb.ProcessDumpReq.Request:type_name -> commonpb.Request
-	150, // 35: sliverpb.ProcessDump.Response:type_name -> commonpb.Response
-	151, // 36: sliverpb.RunAsReq.Request:type_name -> commonpb.Request
-	150, // 37: sliverpb.RunAs.Response:type_name -> commonpb.Response
-	151, // 38: sliverpb.ImpersonateReq.Request:type_name -> commonpb.Request
-	150, // 39: sliverpb.Impersonate.Response:type_name -> commonpb.Response
-	151, // 40: sliverpb.RevToSelfReq.Request:type_name -> commonpb.Request
-	150, // 41: sliverpb.RevToSelf.Response:type_name -> commonpb.Response
-	151, // 42: sliverpb.CurrentTokenOwnerReq.Request:type_name -> commonpb.Request
-	150, // 43: sliverpb.CurrentTokenOwner.Response:type_name -> commonpb.Response
-	151, // 44: sliverpb.InvokeGetSystemReq.Request:type_name -> commonpb.Request
-	150, // 45: sliverpb.GetSystem.Response:type_name -> commonpb.Response
-	151, // 46: sliverpb.MakeTokenReq.Request:type_name -> commonpb.Request
-	150, // 47: sliverpb.MakeToken.Response:type_name -> commonpb.Response
-	151, // 48: sliverpb.TaskReq.Request:type_name -> commonpb.Request
-	150, // 49: sliverpb.Task.Response:type_name -> commonpb.Response
-	151, // 50: sliverpb.ExecuteAssemblyReq.Request:type_name -> commonpb.Request
-	151, // 51: sliverpb.InvokeExecuteAssemblyReq.Request:type_name -> commonpb.Request
-	150, // 52: sliverpb.ExecuteAssembly.Response:type_name -> commonpb.Response
-	151, // 53: sliverpb.InvokeMigrateReq.Request:type_name -> commonpb.Request
-	150, // 54: sliverpb.Migrate.Response:type_name -> commonpb.Response
-	151, // 55: sliverpb.ExecuteReq.Request:type_name -> commonpb.Request
-	151, // 56: sliverpb.ExecuteTokenReq.Request:type_name -> commonpb.Request
-	150, // 57: sliverpb.Execute.Response:type_name -> commonpb.Response
-	151, // 58: sliverpb.SideloadReq.Request:type_name -> commonpb.Request
-	150, // 59: sliverpb.Sideload.Response:type_name -> commonpb.Response
-	151, // 60: sliverpb.InvokeSpawnDllReq.Request:type_name -> commonpb.Request
-	151, // 61: sliverpb.SpawnDllReq.Request:type_name -> commonpb.Request
-	150, // 62: sliverpb.SpawnDll.Response:type_name -> commonpb.Response
-	151, // 63: sliverpb.NetstatReq.Request:type_name -> commonpb.Request
-	149, // 64: sliverpb.SockTabEntry.LocalAddr:type_name -> sliverpb.SockTabEntry.SockAddr
-	149, // 65: sliverpb.SockTabEntry.RemoteAddr:type_name -> sliverpb.SockTabEntry.SockAddr
-	152, // 66: sliverpb.SockTabEntry.Process:type_name -> commonpb.Process
+	152, // 20: sliverpb.Ls.Response:type_name -> commonpb.Response
+	153, // 21: sliverpb.CdReq.Request:type_name -> commonpb.Request
+	153, // 22: sliverpb.PwdReq.Request:type_name -> commonpb.Request
+	152, // 23: sliverpb.Pwd.Response:type_name -> commonpb.Response
+	153, // 24: sliverpb.RmReq.Request:type_name -> commonpb.Request
+	152, // 25: sliverpb.Rm.Response:type_name -> commonpb.Response
+	153, // 26: sliverpb.MvReq.Request:type_name -> commonpb.Request
+	152, // 27: sliverpb.Mv.Response:type_name -> commonpb.Response
+	153, // 28: sliverpb.MkdirReq.Request:type_name -> commonpb.Request
+	152, // 29: sliverpb.Mkdir.Response:type_name -> commonpb.Response
+	153, // 30: sliverpb.DownloadReq.Request:type_name -> commonpb.Request
+	152, // 31: sliverpb.Download.Response:type_name -> commonpb.Response
+	153, // 32: sliverpb.UploadReq.Request:type_name -> commonpb.Request
+	152, // 33: sliverpb.Upload.Response:type_name -> commonpb.Response
+	153, // 34: sliverpb.ProcessDumpReq.Request:type_name -> commonpb.Request
+	152, // 35: sliverpb.ProcessDump.Response:type_name -> commonpb.Response
+	153, // 36: sliverpb.RunAsReq.Request:type_name -> commonpb.Request
+	152, // 37: sliverpb.RunAs.Response:type_name -> commonpb.Response
+	153, // 38: sliverpb.ImpersonateReq.Request:type_name -> commonpb.Request
+	152, // 39: sliverpb.Impersonate.Response:type_name -> commonpb.Response
+	153, // 40: sliverpb.RevToSelfReq.Request:type_name -> commonpb.Request
+	152, // 41: sliverpb.RevToSelf.Response:type_name -> commonpb.Response
+	153, // 42: sliverpb.CurrentTokenOwnerReq.Request:type_name -> commonpb.Request
+	152, // 43: sliverpb.CurrentTokenOwner.Response:type_name -> commonpb.Response
+	153, // 44: sliverpb.InvokeGetSystemReq.Request:type_name -> commonpb.Request
+	152, // 45: sliverpb.GetSystem.Response:type_name -> commonpb.Response
+	153, // 46: sliverpb.MakeTokenReq.Request:type_name -> commonpb.Request
+	152, // 47: sliverpb.MakeToken.Response:type_name -> commonpb.Response
+	153, // 48: sliverpb.TaskReq.Request:type_name -> commonpb.Request
+	152, // 49: sliverpb.Task.Response:type_name -> commonpb.Response
+	153, // 50: sliverpb.ExecuteAssemblyReq.Request:type_name -> commonpb.Request
+	153, // 51: sliverpb.InvokeExecuteAssemblyReq.Request:type_name -> commonpb.Request
+	152, // 52: sliverpb.ExecuteAssembly.Response:type_name -> commonpb.Response
+	153, // 53: sliverpb.InvokeMigrateReq.Request:type_name -> commonpb.Request
+	152, // 54: sliverpb.Migrate.Response:type_name -> commonpb.Response
+	153, // 55: sliverpb.ExecuteReq.Request:type_name -> commonpb.Request
+	153, // 56: sliverpb.ExecuteTokenReq.Request:type_name -> commonpb.Request
+	152, // 57: sliverpb.Execute.Response:type_name -> commonpb.Response
+	153, // 58: sliverpb.SideloadReq.Request:type_name -> commonpb.Request
+	152, // 59: sliverpb.Sideload.Response:type_name -> commonpb.Response
+	153, // 60: sliverpb.InvokeSpawnDllReq.Request:type_name -> commonpb.Request
+	153, // 61: sliverpb.SpawnDllReq.Request:type_name -> commonpb.Request
+	152, // 62: sliverpb.SpawnDll.Response:type_name -> commonpb.Response
+	153, // 63: sliverpb.NetstatReq.Request:type_name -> commonpb.Request
+	151, // 64: sliverpb.SockTabEntry.LocalAddr:type_name -> sliverpb.SockTabEntry.SockAddr
+	151, // 65: sliverpb.SockTabEntry.RemoteAddr:type_name -> sliverpb.SockTabEntry.SockAddr
+	154, // 66: sliverpb.SockTabEntry.Process:type_name -> commonpb.Process
 	64,  // 67: sliverpb.Netstat.Entries:type_name -> sliverpb.SockTabEntry
-	150, // 68: sliverpb.Netstat.Response:type_name -> commonpb.Response
-	151, // 69: sliverpb.EnvReq.Request:type_name -> commonpb.Request
-	153, // 70: sliverpb.EnvInfo.Variables:type_name -> commonpb.EnvVar
-	150, // 71: sliverpb.EnvInfo.Response:type_name -> commonpb.Response
-	153, // 72: sliverpb.SetEnvReq.Variable:type_name -> commonpb.EnvVar
-	151, // 73: sliverpb.SetEnvReq.Request:type_name -> commonpb.Request
-	150, // 74: sliverpb.SetEnv.Response:type_name -> commonpb.Response
-	151, // 75: sliverpb.UnsetEnvReq.Request:type_name -> commonpb.Request
-	150, // 76: sliverpb.UnsetEnv.Response:type_name -> commonpb.Response
+	152, // 68: sliverpb.Netstat.Response:type_name -> commonpb.Response
+	153, // 69: sliverpb.EnvReq.Request:type_name -> commonpb.Request
+	155, // 70: sliverpb.EnvInfo.Variables:type_name -> commonpb.EnvVar
+	152, // 71: sliverpb.EnvInfo.Response:type_name -> commonpb.Response
+	155, // 72: sliverpb.SetEnvReq.Variable:type_name -> commonpb.EnvVar
+	153, // 73: sliverpb.SetEnvReq.Request:type_name -> commonpb.Request
+	152, // 74: sliverpb.SetEnv.Response:type_name -> commonpb.Response
+	153, // 75: sliverpb.UnsetEnvReq.Request:type_name -> commonpb.Request
+	152, // 76: sliverpb.UnsetEnv.Response:type_name -> commonpb.Response
 	74,  // 77: sliverpb.DNSPoll.blocks:type_name -> sliverpb.DNSBlockHeader
-	151, // 78: sliverpb.ScreenshotReq.Request:type_name -> commonpb.Request
-	150, // 79: sliverpb.Screenshot.Response:type_name -> commonpb.Response
-	151, // 80: sliverpb.StartServiceReq.Request:type_name -> commonpb.Request
-	150, // 81: sliverpb.ServiceInfo.Response:type_name -> commonpb.Response
+	153, // 78: sliverpb.ScreenshotReq.Request:type_name -> commonpb.Request
+	152, // 79: sliverpb.Screenshot.Response:type_name -> commonpb.Response
+	153, // 80: sliverpb.StartServiceReq.Request:type_name -> commonpb.Request
+	152, // 81: sliverpb.ServiceInfo.Response:type_name -> commonpb.Response
 	80,  // 82: sliverpb.StopServiceReq.ServiceInfo:type_name -> sliverpb.ServiceInfoReq
-	151, // 83: sliverpb.StopServiceReq.Request:type_name -> commonpb.Request
+	153, // 83: sliverpb.StopServiceReq.Request:type_name -> commonpb.Request
 	80,  // 84: sliverpb.RemoveServiceReq.ServiceInfo:type_name -> sliverpb.ServiceInfoReq
-	151, // 85: sliverpb.RemoveServiceReq.Request:type_name -> commonpb.Request
-	151, // 86: sliverpb.BackdoorReq.Request:type_name -> commonpb.Request
-	150, // 87: sliverpb.Backdoor.Response:type_name -> commonpb.Response
-	151, // 88: sliverpb.RegistryReadReq.Request:type_name -> commonpb.Request
-	150, // 89: sliverpb.RegistryRead.Response:type_name -> commonpb.Response
-	151, // 90: sliverpb.RegistryWriteReq.Request:type_name -> commonpb.Request
-	150, // 91: sliverpb.RegistryWrite.Response:type_name -> commonpb.Response
-	151, // 92: sliverpb.RegistryCreateKeyReq.Request:type_name -> commonpb.Request
-	150, // 93: sliverpb.RegistryCreateKey.Response:type_name -> commonpb.Response
-	151, // 94: sliverpb.RegistryDeleteKeyReq.Request:type_name -> commonpb.Request
-	150, // 95: sliverpb.RegistryDeleteKey.Response:type_name -> commonpb.Response
-	151, // 96: sliverpb.RegistrySubKeyListReq.Request:type_name -> commonpb.Request
-	150, // 97: sliverpb.RegistrySubKeyList.Response:type_name -> commonpb.Response
-	151, // 98: sliverpb.RegistryListValuesReq.Request:type_name -> commonpb.Request
-	150, // 99: sliverpb.RegistryValuesList.Response:type_name -> commonpb.Response
-	151, // 100: sliverpb.ShellReq.Request:type_name -> commonpb.Request
-	150, // 101: sliverpb.Shell.Response:type_name -> commonpb.Response
-	151, // 102: sliverpb.PortfwdReq.Request:type_name -> commonpb.Request
-	150, // 103: sliverpb.Portfwd.Response:type_name -> commonpb.Response
-	151, // 104: sliverpb.SocksData.Request:type_name -> commonpb.Request
+	153, // 85: sliverpb.RemoveServiceReq.Request:type_name -> commonpb.Request
+	153, // 86: sliverpb.BackdoorReq.Request:type_name -> commonpb.Request
+	152, // 87: sliverpb.Backdoor.Response:type_name -> commonpb.Response
+	153, // 88: sliverpb.RegistryReadReq.Request:type_name -> commonpb.Request
+	152, // 89: sliverpb.RegistryRead.Response:type_name -> commonpb.Response
+	153, // 90: sliverpb.RegistryWriteReq.Request:type_name -> commonpb.Request
+	152, // 91: sliverpb.RegistryWrite.Response:type_name -> commonpb.Response
+	153, // 92: sliverpb.RegistryCreateKeyReq.Request:type_name -> commonpb.Request
+	152, // 93: sliverpb.RegistryCreateKey.Response:type_name -> commonpb.Response
+	153, // 94: sliverpb.RegistryDeleteKeyReq.Request:type_name -> commonpb.Request
+	152, // 95: sliverpb.RegistryDeleteKey.Response:type_name -> commonpb.Response
+	153, // 96: sliverpb.RegistrySubKeyListReq.Request:type_name -> commonpb.Request
+	152, // 97: sliverpb.RegistrySubKeyList.Response:type_name -> commonpb.Response
+	153, // 98: sliverpb.RegistryListValuesReq.Request:type_name -> commonpb.Request
+	152, // 99: sliverpb.RegistryValuesList.Response:type_name -> commonpb.Response
+	153, // 100: sliverpb.ShellReq.Request:type_name -> commonpb.Request
+	152, // 101: sliverpb.Shell.Response:type_name -> commonpb.Response
+	153, // 102: sliverpb.PortfwdReq.Request:type_name -> commonpb.Request
+	152, // 103: sliverpb.Portfwd.Response:type_name -> commonpb.Response
+	153, // 104: sliverpb.SocksData.Request:type_name -> commonpb.Request
 	0,   // 105: sliverpb.PivotStartListenerReq.Type:type_name -> sliverpb.PivotType
-	151, // 106: sliverpb.PivotStartListenerReq.Request:type_name -> commonpb.Request
-	151, // 107: sliverpb.PivotStopListenerReq.Request:type_name -> commonpb.Request
+	153, // 106: sliverpb.PivotStartListenerReq.Request:type_name -> commonpb.Request
+	153, // 107: sliverpb.PivotStopListenerReq.Request:type_name -> commonpb.Request
 	0,   // 108: sliverpb.PivotListener.Type:type_name -> sliverpb.PivotType
 	113, // 109: sliverpb.PivotListener.Pivots:type_name -> sliverpb.NetConnPivot
-	150, // 110: sliverpb.PivotListener.Response:type_name -> commonpb.Response
+	152, // 110: sliverpb.PivotListener.Response:type_name -> commonpb.Response
 	110, // 111: sliverpb.PivotPeerEnvelope.Peers:type_name -> sliverpb.PivotPeer
 	1,   // 112: sliverpb.PivotPeerFailure.Type:type_name -> sliverpb.PeerFailureType
-	151, // 113: sliverpb.PivotListenersReq.Request:type_name -> commonpb.Request
+	153, // 113: sliverpb.PivotListenersReq.Request:type_name -> commonpb.Request
 	107, // 114: sliverpb.PivotListeners.Listeners:type_name -> sliverpb.PivotListener
-	150, // 115: sliverpb.PivotListeners.Response:type_name -> commonpb.Response
-	151, // 116: sliverpb.WGPortForwardStartReq.Request:type_name -> commonpb.Request
+	152, // 115: sliverpb.PivotListeners.Response:type_name -> commonpb.Response
+	153, // 116: sliverpb.WGPortForwardStartReq.Request:type_name -> commonpb.Request
 	125, // 117: sliverpb.WGPortForward.Forwarder:type_name -> sliverpb.WGTCPForwarder
-	150, // 118: sliverpb.WGPortForward.Response:type_name -> commonpb.Response
-	151, // 119: sliverpb.WGPortForwardStopReq.Request:type_name -> commonpb.Request
-	151, // 120: sliverpb.WGSocksStartReq.Request:type_name -> commonpb.Request
+	152, // 118: sliverpb.WGPortForward.Response:type_name -> commonpb.Response
+	153, // 119: sliverpb.WGPortForwardStopReq.Request:type_name -> commonpb.Request
+	153, // 120: sliverpb.WGSocksStartReq.Request:type_name -> commonpb.Request
 	126, // 121: sliverpb.WGSocks.Server:type_name -> sliverpb.WGSocksServer
-	150, // 122: sliverpb.WGSocks.Response:type_name -> commonpb.Response
-	151, // 123: sliverpb.WGSocksStopReq.Request:type_name -> commonpb.Request
-	151, // 124: sliverpb.WGTCPForwardersReq.Request:type_name -> commonpb.Request
-	151, // 125: sliverpb.WGSocksServersReq.Request:type_name -> commonpb.Request
+	152, // 122: sliverpb.WGSocks.Response:type_name -> commonpb.Response
+	153, // 123: sliverpb.WGSocksStopReq.Request:type_name -> commonpb.Request
+	153, // 124: sliverpb.WGTCPForwardersReq.Request:type_name -> commonpb.Request
+	153, // 125: sliverpb.WGSocksServersReq.Request:type_name -> commonpb.Request
 	126, // 126: sliverpb.WGSocksServers.Servers:type_name -> sliverpb.WGSocksServer
-	150, // 127: sliverpb.WGSocksServers.Response:type_name -> commonpb.Response
+	152, // 127: sliverpb.WGSocksServers.Response:type_name -> commonpb.Response
 	125, // 128: sliverpb.WGTCPForwarders.Forwarders:type_name -> sliverpb.WGTCPForwarder
-	150, // 129: sliverpb.WGTCPForwarders.Response:type_name -> commonpb.Response
-	151, // 130: sliverpb.ReconfigureReq.Request:type_name -> commonpb.Request
-	150, // 131: sliverpb.Reconfigure.Response:type_name -> commonpb.Response
-	151, // 132: sliverpb.PollIntervalReq.Request:type_name -> commonpb.Request
-	150, // 133: sliverpb.PollInterval.Response:type_name -> commonpb.Response
-	151, // 134: sliverpb.SSHCommandReq.Request:type_name -> commonpb.Request
-	150, // 135: sliverpb.SSHCommand.Response:type_name -> commonpb.Response
-	151, // 136: sliverpb.GetPrivsReq.Request:type_name -> commonpb.Request
+	152, // 129: sliverpb.WGTCPForwarders.Response:type_name -> commonpb.Response
+	153, // 130: sliverpb.ReconfigureReq.Request:type_name -> commonpb.Request
+	152, // 131: sliverpb.Reconfigure.Response:type_name -> commonpb.Response
+	153, // 132: sliverpb.PollIntervalReq.Request:type_name -> commonpb.Request
+	152, // 133: sliverpb.PollInterval.Response:type_name -> commonpb.Response
+	153, // 134: sliverpb.SSHCommandReq.Request:type_name -> commonpb.Request
+	152, // 135: sliverpb.SSHCommand.Response:type_name -> commonpb.Response
+	153, // 136: sliverpb.GetPrivsReq.Request:type_name -> commonpb.Request
 	136, // 137: sliverpb.GetPrivs.PrivInfo:type_name -> sliverpb.WindowsPrivilegeEntry
-	150, // 138: sliverpb.GetPrivs.Response:type_name -> commonpb.Response
-	151, // 139: sliverpb.RegisterExtensionReq.Request:type_name -> commonpb.Request
-	150, // 140: sliverpb.RegisterExtension.Response:type_name -> commonpb.Response
-	151, // 141: sliverpb.CallExtensionReq.Request:type_name -> commonpb.Request
-	150, // 142: sliverpb.CallExtension.Response:type_name -> commonpb.Response
-	151, // 143: sliverpb.ListExtensionsReq.Request:type_name -> commonpb.Request
-	150, // 144: sliverpb.ListExtensions.Response:type_name -> commonpb.Response
-	151, // 145: sliverpb.RportFwdStopListenerReq.Request:type_name -> commonpb.Request
-	151, // 146: sliverpb.RportFwdStartListenerReq.Request:type_name -> commonpb.Request
-	150, // 147: sliverpb.RportFwdListener.Response:type_name -> commonpb.Response
+	152, // 138: sliverpb.GetPrivs.Response:type_name -> commonpb.Response
+	153, // 139: sliverpb.RegisterExtensionReq.Request:type_name -> commonpb.Request
+	152, // 140: sliverpb.RegisterExtension.Response:type_name -> commonpb.Response
+	153, // 141: sliverpb.CallExtensionReq.Request:type_name -> commonpb.Request
+	152, // 142: sliverpb.CallExtension.Response:type_name -> commonpb.Response
+	153, // 143: sliverpb.ListExtensionsReq.Request:type_name -> commonpb.Request
+	152, // 144: sliverpb.ListExtensions.Response:type_name -> commonpb.Response
+	153, // 145: sliverpb.RportFwdStopListenerReq.Request:type_name -> commonpb.Request
+	153, // 146: sliverpb.RportFwdStartListenerReq.Request:type_name -> commonpb.Request
+	152, // 147: sliverpb.RportFwdListener.Response:type_name -> commonpb.Response
 	146, // 148: sliverpb.RportFwdListeners.Listeners:type_name -> sliverpb.RportFwdListener
-	150, // 149: sliverpb.RportFwdListeners.Response:type_name -> commonpb.Response
-	151, // 150: sliverpb.RportFwdListenersReq.Request:type_name -> commonpb.Request
-	151, // [151:151] is the sub-list for method output_type
-	151, // [151:151] is the sub-list for method input_type
-	151, // [151:151] is the sub-list for extension type_name
-	151, // [151:151] is the sub-list for extension extendee
-	0,   // [0:151] is the sub-list for field type_name
+	152, // 149: sliverpb.RportFwdListeners.Response:type_name -> commonpb.Response
+	153, // 150: sliverpb.RportFwdListenersReq.Request:type_name -> commonpb.Request
+	152, // 151: sliverpb.RPortfwd.Response:type_name -> commonpb.Response
+	153, // 152: sliverpb.RPortfwdReq.Request:type_name -> commonpb.Request
+	153, // [153:153] is the sub-list for method output_type
+	153, // [153:153] is the sub-list for method input_type
+	153, // [153:153] is the sub-list for extension type_name
+	153, // [153:153] is the sub-list for extension extendee
+	0,   // [0:153] is the sub-list for field type_name
 }
 
 func init() { file_sliverpb_sliver_proto_init() }
@@ -12765,6 +12947,30 @@ func file_sliverpb_sliver_proto_init() {
 			}
 		}
 		file_sliverpb_sliver_proto_msgTypes[147].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RPortfwd); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sliverpb_sliver_proto_msgTypes[148].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RPortfwdReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sliverpb_sliver_proto_msgTypes[149].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SockTabEntry_SockAddr); i {
 			case 0:
 				return &v.state
@@ -12783,7 +12989,7 @@ func file_sliverpb_sliver_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_sliverpb_sliver_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   148,
+			NumMessages:   150,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
