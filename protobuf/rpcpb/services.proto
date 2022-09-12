@@ -117,6 +117,7 @@ service SliverRPC {
     rpc Screenshot(sliverpb.ScreenshotReq) returns (sliverpb.Screenshot);
     rpc CurrentTokenOwner(sliverpb.CurrentTokenOwnerReq) returns (sliverpb.CurrentTokenOwner);
     
+    
     // *** Pivots ***
     rpc PivotStartListener(sliverpb.PivotStartListenerReq) returns (sliverpb.PivotListener);
     rpc PivotStopListener(sliverpb.PivotStopListenerReq) returns (commonpb.Empty);
@@ -141,6 +142,9 @@ service SliverRPC {
     rpc RunSSHCommand(sliverpb.SSHCommandReq) returns (sliverpb.SSHCommand);
     rpc HijackDLL(clientpb.DllHijackReq) returns (clientpb.DllHijack);
     rpc GetPrivs(sliverpb.GetPrivsReq) returns (sliverpb.GetPrivs);
+    rpc StartRportfwdListener(sliverpb.RportFwdStartListenerReq) returns (sliverpb.RportFwdListener);
+    rpc GetRportFwdListeners(sliverpb.RportFwdListenersReq) returns (sliverpb.RportFwdListeners);
+    rpc StopRportfwdListener(sliverpb.RportFwdStopListenerReq) returns (sliverpb.RportFwdListener);
 
     // Beacon only commands
     rpc OpenSession(sliverpb.OpenSession) returns (sliverpb.OpenSession);
@@ -161,8 +165,7 @@ service SliverRPC {
 
     // *** Realtime Commands ***
     rpc Shell(sliverpb.ShellReq) returns (sliverpb.Shell);
-    rpc Portfwd(sliverpb.PortfwdReq) returns (sliverpb.Portfwd);
-
+    
     // *** Socks5 ***
     rpc CreateSocks(sliverpb.Socks) returns (sliverpb.Socks);
     rpc CloseSocks(sliverpb.Socks) returns (commonpb.Empty);

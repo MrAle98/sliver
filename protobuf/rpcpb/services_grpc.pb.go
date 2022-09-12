@@ -141,6 +141,9 @@ type SliverRPCClient interface {
 	RunSSHCommand(ctx context.Context, in *sliverpb.SSHCommandReq, opts ...grpc.CallOption) (*sliverpb.SSHCommand, error)
 	HijackDLL(ctx context.Context, in *clientpb.DllHijackReq, opts ...grpc.CallOption) (*clientpb.DllHijack, error)
 	GetPrivs(ctx context.Context, in *sliverpb.GetPrivsReq, opts ...grpc.CallOption) (*sliverpb.GetPrivs, error)
+	StartRportfwdListener(ctx context.Context, in *sliverpb.RportFwdStartListenerReq, opts ...grpc.CallOption) (*sliverpb.RportFwdListener, error)
+	GetRportFwdListeners(ctx context.Context, in *sliverpb.RportFwdListenersReq, opts ...grpc.CallOption) (*sliverpb.RportFwdListeners, error)
+	StopRportfwdListener(ctx context.Context, in *sliverpb.RportFwdStopListenerReq, opts ...grpc.CallOption) (*sliverpb.RportFwdListener, error)
 	// Beacon only commands
 	OpenSession(ctx context.Context, in *sliverpb.OpenSession, opts ...grpc.CallOption) (*sliverpb.OpenSession, error)
 	CloseSession(ctx context.Context, in *sliverpb.CloseSession, opts ...grpc.CallOption) (*commonpb.Empty, error)
@@ -157,7 +160,6 @@ type SliverRPCClient interface {
 	WGListSocksServers(ctx context.Context, in *sliverpb.WGSocksServersReq, opts ...grpc.CallOption) (*sliverpb.WGSocksServers, error)
 	// *** Realtime Commands ***
 	Shell(ctx context.Context, in *sliverpb.ShellReq, opts ...grpc.CallOption) (*sliverpb.Shell, error)
-	Portfwd(ctx context.Context, in *sliverpb.PortfwdReq, opts ...grpc.CallOption) (*sliverpb.Portfwd, error)
 	// *** Socks5 ***
 	CreateSocks(ctx context.Context, in *sliverpb.Socks, opts ...grpc.CallOption) (*sliverpb.Socks, error)
 	CloseSocks(ctx context.Context, in *sliverpb.Socks, opts ...grpc.CallOption) (*commonpb.Empty, error)
@@ -1087,6 +1089,33 @@ func (c *sliverRPCClient) GetPrivs(ctx context.Context, in *sliverpb.GetPrivsReq
 	return out, nil
 }
 
+func (c *sliverRPCClient) StartRportfwdListener(ctx context.Context, in *sliverpb.RportFwdStartListenerReq, opts ...grpc.CallOption) (*sliverpb.RportFwdListener, error) {
+	out := new(sliverpb.RportFwdListener)
+	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/StartRportfwdListener", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sliverRPCClient) GetRportFwdListeners(ctx context.Context, in *sliverpb.RportFwdListenersReq, opts ...grpc.CallOption) (*sliverpb.RportFwdListeners, error) {
+	out := new(sliverpb.RportFwdListeners)
+	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/GetRportFwdListeners", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sliverRPCClient) StopRportfwdListener(ctx context.Context, in *sliverpb.RportFwdStopListenerReq, opts ...grpc.CallOption) (*sliverpb.RportFwdListener, error) {
+	out := new(sliverpb.RportFwdListener)
+	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/StopRportfwdListener", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *sliverRPCClient) OpenSession(ctx context.Context, in *sliverpb.OpenSession, opts ...grpc.CallOption) (*sliverpb.OpenSession, error) {
 	out := new(sliverpb.OpenSession)
 	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/OpenSession", in, out, opts...)
@@ -1189,15 +1218,6 @@ func (c *sliverRPCClient) WGListSocksServers(ctx context.Context, in *sliverpb.W
 func (c *sliverRPCClient) Shell(ctx context.Context, in *sliverpb.ShellReq, opts ...grpc.CallOption) (*sliverpb.Shell, error) {
 	out := new(sliverpb.Shell)
 	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/Shell", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *sliverRPCClient) Portfwd(ctx context.Context, in *sliverpb.PortfwdReq, opts ...grpc.CallOption) (*sliverpb.Portfwd, error) {
-	out := new(sliverpb.Portfwd)
-	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/Portfwd", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1454,6 +1474,9 @@ type SliverRPCServer interface {
 	RunSSHCommand(context.Context, *sliverpb.SSHCommandReq) (*sliverpb.SSHCommand, error)
 	HijackDLL(context.Context, *clientpb.DllHijackReq) (*clientpb.DllHijack, error)
 	GetPrivs(context.Context, *sliverpb.GetPrivsReq) (*sliverpb.GetPrivs, error)
+	StartRportfwdListener(context.Context, *sliverpb.RportFwdStartListenerReq) (*sliverpb.RportFwdListener, error)
+	GetRportFwdListeners(context.Context, *sliverpb.RportFwdListenersReq) (*sliverpb.RportFwdListeners, error)
+	StopRportfwdListener(context.Context, *sliverpb.RportFwdStopListenerReq) (*sliverpb.RportFwdListener, error)
 	// Beacon only commands
 	OpenSession(context.Context, *sliverpb.OpenSession) (*sliverpb.OpenSession, error)
 	CloseSession(context.Context, *sliverpb.CloseSession) (*commonpb.Empty, error)
@@ -1470,7 +1493,6 @@ type SliverRPCServer interface {
 	WGListSocksServers(context.Context, *sliverpb.WGSocksServersReq) (*sliverpb.WGSocksServers, error)
 	// *** Realtime Commands ***
 	Shell(context.Context, *sliverpb.ShellReq) (*sliverpb.Shell, error)
-	Portfwd(context.Context, *sliverpb.PortfwdReq) (*sliverpb.Portfwd, error)
 	// *** Socks5 ***
 	CreateSocks(context.Context, *sliverpb.Socks) (*sliverpb.Socks, error)
 	CloseSocks(context.Context, *sliverpb.Socks) (*commonpb.Empty, error)
@@ -1791,6 +1813,15 @@ func (UnimplementedSliverRPCServer) HijackDLL(context.Context, *clientpb.DllHija
 func (UnimplementedSliverRPCServer) GetPrivs(context.Context, *sliverpb.GetPrivsReq) (*sliverpb.GetPrivs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPrivs not implemented")
 }
+func (UnimplementedSliverRPCServer) StartRportfwdListener(context.Context, *sliverpb.RportFwdStartListenerReq) (*sliverpb.RportFwdListener, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartRportfwdListener not implemented")
+}
+func (UnimplementedSliverRPCServer) GetRportFwdListeners(context.Context, *sliverpb.RportFwdListenersReq) (*sliverpb.RportFwdListeners, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRportFwdListeners not implemented")
+}
+func (UnimplementedSliverRPCServer) StopRportfwdListener(context.Context, *sliverpb.RportFwdStopListenerReq) (*sliverpb.RportFwdListener, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StopRportfwdListener not implemented")
+}
 func (UnimplementedSliverRPCServer) OpenSession(context.Context, *sliverpb.OpenSession) (*sliverpb.OpenSession, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OpenSession not implemented")
 }
@@ -1826,9 +1857,6 @@ func (UnimplementedSliverRPCServer) WGListSocksServers(context.Context, *sliverp
 }
 func (UnimplementedSliverRPCServer) Shell(context.Context, *sliverpb.ShellReq) (*sliverpb.Shell, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Shell not implemented")
-}
-func (UnimplementedSliverRPCServer) Portfwd(context.Context, *sliverpb.PortfwdReq) (*sliverpb.Portfwd, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Portfwd not implemented")
 }
 func (UnimplementedSliverRPCServer) CreateSocks(context.Context, *sliverpb.Socks) (*sliverpb.Socks, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSocks not implemented")
@@ -3682,6 +3710,60 @@ func _SliverRPC_GetPrivs_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SliverRPC_StartRportfwdListener_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(sliverpb.RportFwdStartListenerReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SliverRPCServer).StartRportfwdListener(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpcpb.SliverRPC/StartRportfwdListener",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SliverRPCServer).StartRportfwdListener(ctx, req.(*sliverpb.RportFwdStartListenerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SliverRPC_GetRportFwdListeners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(sliverpb.RportFwdListenersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SliverRPCServer).GetRportFwdListeners(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpcpb.SliverRPC/GetRportFwdListeners",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SliverRPCServer).GetRportFwdListeners(ctx, req.(*sliverpb.RportFwdListenersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SliverRPC_StopRportfwdListener_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(sliverpb.RportFwdStopListenerReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SliverRPCServer).StopRportfwdListener(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpcpb.SliverRPC/StopRportfwdListener",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SliverRPCServer).StopRportfwdListener(ctx, req.(*sliverpb.RportFwdStopListenerReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SliverRPC_OpenSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(sliverpb.OpenSession)
 	if err := dec(in); err != nil {
@@ -3894,24 +3976,6 @@ func _SliverRPC_Shell_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SliverRPCServer).Shell(ctx, req.(*sliverpb.ShellReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _SliverRPC_Portfwd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(sliverpb.PortfwdReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SliverRPCServer).Portfwd(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/rpcpb.SliverRPC/Portfwd",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SliverRPCServer).Portfwd(ctx, req.(*sliverpb.PortfwdReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4473,6 +4537,18 @@ var SliverRPC_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SliverRPC_GetPrivs_Handler,
 		},
 		{
+			MethodName: "StartRportfwdListener",
+			Handler:    _SliverRPC_StartRportfwdListener_Handler,
+		},
+		{
+			MethodName: "GetRportFwdListeners",
+			Handler:    _SliverRPC_GetRportFwdListeners_Handler,
+		},
+		{
+			MethodName: "StopRportfwdListener",
+			Handler:    _SliverRPC_StopRportfwdListener_Handler,
+		},
+		{
 			MethodName: "OpenSession",
 			Handler:    _SliverRPC_OpenSession_Handler,
 		},
@@ -4519,10 +4595,6 @@ var SliverRPC_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Shell",
 			Handler:    _SliverRPC_Shell_Handler,
-		},
-		{
-			MethodName: "Portfwd",
-			Handler:    _SliverRPC_Portfwd_Handler,
 		},
 		{
 			MethodName: "CreateSocks",
