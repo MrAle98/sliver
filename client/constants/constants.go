@@ -226,6 +226,7 @@ const (
 	PortfwdStr = "portfwd"
 	Socks5Str  = "socks5"
 
+	RportfwdStr = "rportfwd"
 	ReactionStr = "reaction"
 
 	HostsStr = "hosts"

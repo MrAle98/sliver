@@ -91,7 +91,7 @@ var (
 		consts.SSHStr:                       sshHelp,
 		consts.DLLHijackStr:                 dllHijackHelp,
 		consts.GetPrivsStr:                  getPrivsHelp,
-
+		consts.RportfwdStr:                  rPortFwdHelp,
 		// Loot
 		consts.LootStr: lootHelp,
 
@@ -558,6 +558,23 @@ Stop and remove an existing listener:
 
 	wg-portfwd rm 0
 `
+
+	rPortFwdHelp = `[[.Bold]]Command:[[.Normal]] rportfwd
+[[.Bold]]About:[[.Normal]] Create a reverse TCP port forward on the implant
+[[.Bold]]Examples:[[.Normal]]
+Add a new forwarding rule:
+
+	rportfwd add --remote 1.2.3.4:1234 --bind 0.0.0.0:8080
+
+List existing listeners:
+
+	rportfwd
+
+Stop and remove an existing listener:
+
+	rportfwd rm 0
+	`
+
 	sshHelp = `[[.Bold]]Command:[[.Normal]] ssh
 [[.Bold]]About:[[.Normal]] Run an one-off SSH command via the implant.
 The built-in client will use the ssh-agent to connect to the remote host.
