@@ -160,6 +160,7 @@ type SliverRPCClient interface {
 	WGListSocksServers(ctx context.Context, in *sliverpb.WGSocksServersReq, opts ...grpc.CallOption) (*sliverpb.WGSocksServers, error)
 	// *** Realtime Commands ***
 	Shell(ctx context.Context, in *sliverpb.ShellReq, opts ...grpc.CallOption) (*sliverpb.Shell, error)
+	Portfwd(ctx context.Context, in *sliverpb.PortfwdReq, opts ...grpc.CallOption) (*sliverpb.Portfwd, error)
 	// *** Socks5 ***
 	CreateSocks(ctx context.Context, in *sliverpb.Socks, opts ...grpc.CallOption) (*sliverpb.Socks, error)
 	CloseSocks(ctx context.Context, in *sliverpb.Socks, opts ...grpc.CallOption) (*commonpb.Empty, error)
@@ -1224,6 +1225,15 @@ func (c *sliverRPCClient) Shell(ctx context.Context, in *sliverpb.ShellReq, opts
 	return out, nil
 }
 
+func (c *sliverRPCClient) Portfwd(ctx context.Context, in *sliverpb.PortfwdReq, opts ...grpc.CallOption) (*sliverpb.Portfwd, error) {
+	out := new(sliverpb.Portfwd)
+	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/Portfwd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *sliverRPCClient) CreateSocks(ctx context.Context, in *sliverpb.Socks, opts ...grpc.CallOption) (*sliverpb.Socks, error) {
 	out := new(sliverpb.Socks)
 	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/CreateSocks", in, out, opts...)
@@ -1493,6 +1503,7 @@ type SliverRPCServer interface {
 	WGListSocksServers(context.Context, *sliverpb.WGSocksServersReq) (*sliverpb.WGSocksServers, error)
 	// *** Realtime Commands ***
 	Shell(context.Context, *sliverpb.ShellReq) (*sliverpb.Shell, error)
+	Portfwd(context.Context, *sliverpb.PortfwdReq) (*sliverpb.Portfwd, error)
 	// *** Socks5 ***
 	CreateSocks(context.Context, *sliverpb.Socks) (*sliverpb.Socks, error)
 	CloseSocks(context.Context, *sliverpb.Socks) (*commonpb.Empty, error)
@@ -1857,6 +1868,9 @@ func (UnimplementedSliverRPCServer) WGListSocksServers(context.Context, *sliverp
 }
 func (UnimplementedSliverRPCServer) Shell(context.Context, *sliverpb.ShellReq) (*sliverpb.Shell, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Shell not implemented")
+}
+func (UnimplementedSliverRPCServer) Portfwd(context.Context, *sliverpb.PortfwdReq) (*sliverpb.Portfwd, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Portfwd not implemented")
 }
 func (UnimplementedSliverRPCServer) CreateSocks(context.Context, *sliverpb.Socks) (*sliverpb.Socks, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSocks not implemented")
@@ -3980,6 +3994,24 @@ func _SliverRPC_Shell_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SliverRPC_Portfwd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(sliverpb.PortfwdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SliverRPCServer).Portfwd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpcpb.SliverRPC/Portfwd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SliverRPCServer).Portfwd(ctx, req.(*sliverpb.PortfwdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SliverRPC_CreateSocks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(sliverpb.Socks)
 	if err := dec(in); err != nil {
@@ -4595,6 +4627,10 @@ var SliverRPC_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Shell",
 			Handler:    _SliverRPC_Shell_Handler,
+		},
+		{
+			MethodName: "Portfwd",
+			Handler:    _SliverRPC_Portfwd_Handler,
 		},
 		{
 			MethodName: "CreateSocks",
