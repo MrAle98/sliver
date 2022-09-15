@@ -26,7 +26,7 @@ import (
 )
 
 // PivotSessionListeners - Get a list of all reverse port forwards listeners from an implant
-func (rpc *Server) RportFwdSessionListeners(ctx context.Context, req *sliverpb.RportFwdListenersReq) (*sliverpb.RportFwdListeners, error) {
+func (rpc *Server) GetRportFwdListeners(ctx context.Context, req *sliverpb.RportFwdListenersReq) (*sliverpb.RportFwdListeners, error) {
 	resp := &sliverpb.RportFwdListeners{Response: &commonpb.Response{}}
 	err := rpc.GenericHandler(req, resp)
 	if err != nil {
@@ -36,7 +36,7 @@ func (rpc *Server) RportFwdSessionListeners(ctx context.Context, req *sliverpb.R
 }
 
 // PivotStartListener - Instruct the implant to start a reverse port forward
-func (rpc *Server) RPortFwdStartListener(ctx context.Context, req *sliverpb.RportFwdStartListenerReq) (*sliverpb.RportFwdListener, error) {
+func (rpc *Server) StartRportfwdListener(ctx context.Context, req *sliverpb.RportFwdStartListenerReq) (*sliverpb.RportFwdListener, error) {
 	resp := &sliverpb.RportFwdListener{Response: &commonpb.Response{}}
 	err := rpc.GenericHandler(req, resp)
 	if err != nil {
@@ -46,11 +46,11 @@ func (rpc *Server) RPortFwdStartListener(ctx context.Context, req *sliverpb.Rpor
 }
 
 // PivotStopListener - Instruct the implant to stop a pivot listener
-func (rpc *Server) RportFwdStopListener(ctx context.Context, req *sliverpb.RportFwdStopListenerReq) (*commonpb.Empty, error) {
+func (rpc *Server) StopRportfwdListener(ctx context.Context, req *sliverpb.RportFwdStopListenerReq) (*sliverpb.RportFwdListener, error) {
 	resp := &sliverpb.RportFwdListener{Response: &commonpb.Response{}}
 	err := rpc.GenericHandler(req, resp)
 	if err != nil {
 		return nil, err
 	}
-	return &commonpb.Empty{}, nil
+	return resp, nil
 }

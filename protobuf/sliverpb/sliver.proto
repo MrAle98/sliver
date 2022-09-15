@@ -693,7 +693,8 @@ message TunnelData {
   uint64 Sequence = 3;
   uint64 Ack = 4;
   bool Resend = 5;
-
+  bool CreateReverse = 6;
+  RPortfwd rportfwd = 7;
   uint64 TunnelID = 8 [jstype = JS_STRING];
   string SessionID = 9;
 }

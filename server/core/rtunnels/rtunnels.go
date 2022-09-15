@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	Rtunnels map[uint64]*RTunnel
-	mutex    *sync.RWMutex
+	Rtunnels map[uint64]*RTunnel = make(map[uint64]*RTunnel)
+	mutex    sync.RWMutex
 )
 
 // RTunnel - Duplex byte read/write

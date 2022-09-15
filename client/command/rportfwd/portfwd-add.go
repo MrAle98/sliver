@@ -36,8 +36,8 @@ func StartRportFwdListenerCmd(ctx *grumble.Context, con *console.SliverConsoleCl
 		return
 	}
 
-	bindAddress := ctx.Args.String("bind")
-	forwardAddress := ctx.Args.String("forward")
+	bindAddress := ctx.Flags.String("bind")
+	forwardAddress := ctx.Flags.String("remote")
 	rportfwdlistener, err := con.Rpc.StartRportfwdListener(context.Background(), &sliverpb.RportFwdStartListenerReq{
 		Request:        con.ActiveTarget.Request(ctx),
 		BindAddress:    bindAddress,

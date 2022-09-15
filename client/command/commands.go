@@ -2468,7 +2468,7 @@ func BindCommands(con *console.SliverConsoleClient) {
 	// [ Reverse Port Forwarding ] --------------------------------------------------------------
 
 	rportfwdCmd := &grumble.Command{
-		Name:     consts.RegistryStr,
+		Name:     consts.RportfwdStr,
 		Help:     "reverse port forwardings",
 		LongHelp: help.GetHelpFor([]string{consts.RportfwdStr}),
 		Flags: func(f *grumble.Flags) {
