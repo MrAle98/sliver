@@ -100,6 +100,10 @@ func RevertToSelf() error {
 	return windows.RevertToSelf()
 }
 
+func TRevertToSelf() error {
+	return windows.RevertToSelf()
+}
+
 func getPrimaryToken(pid uint32) (*windows.Token, error) {
 	handle, err := windows.OpenProcess(windows.PROCESS_QUERY_INFORMATION, true, pid)
 	if err != nil {

