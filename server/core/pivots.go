@@ -40,8 +40,11 @@ var (
 type Pivot struct {
 	ID                   string
 	OriginID             int64
+	Beacon               bool
+	BeaconID             string
 	ImplantConn          *ImplantConnection
 	ImmediateImplantConn *ImplantConnection
+	ImmediateBeaconID    string
 	CipherCtx            *cryptography.CipherContext
 	Peers                []*sliverpb.PivotPeer
 }
@@ -73,9 +76,11 @@ func (p *Pivot) Start() {
 				coreLog.Errorf("failed to wrap pivot peer envelope: %v", err)
 				continue
 			}
-			p.ImmediateImplantConn.Send <- &sliverpb.Envelope{
-				Type: sliverpb.MsgPivotPeerEnvelope,
-				Data: peerEnvelopeData,
+			if p.Beacon == false {
+				p.ImmediateImplantConn.Send <- &sliverpb.Envelope{
+					Type: sliverpb.MsgPivotPeerEnvelope,
+					Data: peerEnvelopeData,
+				}
 			}
 		}
 	}()
@@ -87,6 +92,15 @@ func NewPivotSession(chain []*sliverpb.PivotPeer) *Pivot {
 	return &Pivot{
 		ID:    id.String(),
 		Peers: chain,
+	}
+}
+func NewPivotBeacon(beaconID string, chain []*sliverpb.PivotPeer) *Pivot {
+	id, _ := uuid.NewV4()
+	return &Pivot{
+		ID:                id.String(),
+		Peers:             chain,
+		Beacon:            true,
+		ImmediateBeaconID: beaconID,
 	}
 }
 

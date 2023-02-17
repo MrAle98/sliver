@@ -157,6 +157,35 @@ func (rpc *Server) asyncGenericHandler(req GenericRequest, resp GenericResponse)
 	if err != nil {
 		return err
 	}
+	// implantConnID := beacon.Transport
+	// var associated_pivot *core.Pivot = nil
+	// core.PivotSessions.Range(func(key, value interface{}) bool {
+	// 	pivot := value.(*core.Pivot)
+	// 	if pivot.ImplantConn.ID == implantConnID {
+	// 		associated_pivot = pivot
+	// 	}
+	// 	return true
+	// })
+	// if associated_pivot != nil {
+	// 	envelope := &sliverpb.Envelope{
+	// 		Type: sliverpb.MsgNumber(req),
+	// 		Data: reqData,
+	// 	}
+	// 	envelopeData, _ := proto.Marshal(envelope)
+	// 	ciphertext, _ := associated_pivot.CipherCtx.Encrypt(envelopeData)
+	// 	peerEnvelopeData, _ := proto.Marshal(&sliverpb.PivotPeerEnvelope{
+	// 		Type:  envelope.Type,
+	// 		Peers: associated_pivot.Peers,
+	// 		Data:  ciphertext,
+	// 	})
+	// 	final_envelope := &sliverpb.Envelope{
+	// 		Type: sliverpb.MsgPivotPeerEnvelope,
+	// 		Data: peerEnvelopeData,
+	// 	}
+	// 	beaconImmediate, _ := db.BeaconByID(associated_pivot.ImmediateBeaconID)
+	// 	t, _ := beaconImmediate.Task(final_envelope)
+	// 	err = db.Session().Save(t).Error
+	// }
 	taskResponse := resp.GetResponse()
 	taskResponse.Async = true
 	taskResponse.BeaconID = beacon.ID.String()

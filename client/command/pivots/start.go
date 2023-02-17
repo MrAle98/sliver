@@ -23,8 +23,10 @@ import (
 	"fmt"
 
 	"github.com/bishopfox/sliver/client/console"
+	"github.com/bishopfox/sliver/protobuf/clientpb"
 	"github.com/bishopfox/sliver/protobuf/sliverpb"
 	"github.com/desertbit/grumble"
+	"google.golang.org/protobuf/proto"
 )
 
 // StartTCPListenerCmd - Start a TCP pivot listener on the remote system
@@ -53,10 +55,11 @@ func StartTCPListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient)
 
 // StartNamedPipeListenerCmd - Start a TCP pivot listener on the remote system
 func StartNamedPipeListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
-	session := con.ActiveTarget.GetSessionInteractive()
-	if session == nil {
+	session, beacon := con.ActiveTarget.GetInteractive()
+	if session == nil && beacon == nil {
 		return
 	}
+
 	var options []bool
 	options = append(options, ctx.Flags.Bool("allow-all"))
 	listener, err := con.Rpc.PivotStartListener(context.Background(), &sliverpb.PivotStartListenerReq{
@@ -69,9 +72,25 @@ func StartNamedPipeListenerCmd(ctx *grumble.Context, con *console.SliverConsoleC
 		con.PrintErrorf("%s\n", err)
 		return
 	}
-	if listener.Response != nil && listener.Response.Err != "" {
-		con.PrintErrorf("%s\n", listener.Response.Err)
-		return
+	if listener.Response != nil && listener.Response.Async {
+		con.AddBeaconCallback(listener.Response.TaskID, func(task *clientpb.BeaconTask) {
+			err = proto.Unmarshal(task.Response, listener)
+			if err != nil {
+				con.PrintErrorf("Failed to decode response %s\n", err)
+				return
+			}
+			if listener.Response != nil && listener.Response.Err != "" {
+				con.PrintErrorf("%s\n", listener.Response.Err)
+				return
+			}
+			con.PrintInfof("Started named pipe pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
+		})
+		con.PrintAsyncResponse(listener.Response)
+	} else {
+		if listener.Response != nil && listener.Response.Err != "" {
+			con.PrintErrorf("%s\n", listener.Response.Err)
+			return
+		}
+		con.PrintInfof("Started named pipe pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
 	}
-	con.PrintInfof("Started named pipe pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
 }
