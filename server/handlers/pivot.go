@@ -106,12 +106,28 @@ func sessionEnvelopeHandler(implantConn *core.ImplantConnection, peerEnvelope *s
 		return nil
 	}
 
-	go handlePivotEnvelope(pivot, envelope)
+	respEnvelope := handlePivotEnvelope(pivot, envelope)
+	if respEnvelope == nil {
+		return nil
+	}
+	ciphertext, err := pivot.CipherCtx.Encrypt(respEnvelope.Data)
+	if err != nil {
+		pivotLog.Errorf("failed to re-encrypt pivot session data: %v", err)
+		return nil
+	}
 
-	return nil
+	data, _ := proto.Marshal(&sliverpb.PivotPeerEnvelope{
+		PivotSessionID: peerEnvelope.PivotSessionID,
+		Peers:          peerEnvelope.Peers,
+		Data:           ciphertext,
+		Type:           peerEnvelope.Type,
+	})
+	return &sliverpb.Envelope{
+		Type: sliverpb.MsgPivotPeerEnvelope,
+		Data: data}
 }
 
-func handlePivotEnvelope(pivot *core.Pivot, envelope *sliverpb.Envelope) {
+func handlePivotEnvelope(pivot *core.Pivot, envelope *sliverpb.Envelope) *sliverpb.Envelope {
 	pivotLog.Debugf("pivot session %s received envelope: %v", pivot.ID, envelope.Type)
 	handlers := GetNonPivotHandlers()
 	pivot.ImplantConn.UpdateLastMessage()
@@ -124,15 +140,14 @@ func handlePivotEnvelope(pivot *core.Pivot, envelope *sliverpb.Envelope) {
 	} else if handler, ok := handlers[envelope.Type]; ok {
 		respEnvelope := handler(pivot.ImplantConn, envelope.Data)
 		if respEnvelope != nil {
-			go func() {
-				pivot.ImplantConn.Send <- respEnvelope
-			}()
+			return respEnvelope
 		}
 	} else if envelope.Type == sliverpb.MsgPivotServerPing {
 		pivotServerPingHandler(pivot)
 	} else {
 		pivotLog.Errorf("no pivot handler for envelope type %v", envelope.Type)
 	}
+	return nil
 }
 
 func pivotPeerFailureHandler(implantConn *core.ImplantConnection, data []byte) *sliverpb.Envelope {

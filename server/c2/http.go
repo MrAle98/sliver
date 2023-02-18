@@ -621,6 +621,7 @@ func (s *SliverHTTPC2) startSessionHandler(resp http.ResponseWriter, req *http.R
 }
 
 func (s *SliverHTTPC2) sessionHandler(resp http.ResponseWriter, req *http.Request) {
+
 	httpLog.Debug("Session request")
 	httpSession := s.getHTTPSession(req)
 	if httpSession == nil {
@@ -628,7 +629,8 @@ func (s *SliverHTTPC2) sessionHandler(resp http.ResponseWriter, req *http.Reques
 		return
 	}
 	httpSession.ImplantConn.UpdateLastMessage()
-
+	nonce, _ := getNonceFromURL(req.URL)
+	_, encoder, _ := encoders.EncoderFromNonce(nonce)
 	plaintext, err := s.readReqBody(httpSession, resp, req)
 	if err != nil {
 		httpLog.Warnf("Failed to decode request body: %s", err)
@@ -643,7 +645,7 @@ func (s *SliverHTTPC2) sessionHandler(resp http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	resp.WriteHeader(http.StatusAccepted)
+	resp.WriteHeader(http.StatusOK)
 	handlers := sliverHandlers.GetHandlers()
 	if envelope.ID != 0 {
 		httpSession.ImplantConn.RespMutex.RLock()
@@ -654,9 +656,14 @@ func (s *SliverHTTPC2) sessionHandler(resp http.ResponseWriter, req *http.Reques
 	} else if handler, ok := handlers[envelope.Type]; ok {
 		respEnvelope := handler(httpSession.ImplantConn, envelope.Data)
 		if respEnvelope != nil {
-			go func() {
-				httpSession.ImplantConn.Send <- respEnvelope
-			}()
+			s.noCacheHeader(resp)
+			envelopeData, _ := proto.Marshal(respEnvelope)
+			ciphertext, err := httpSession.CipherCtx.Encrypt(envelopeData)
+			if err != nil {
+				httpLog.Errorf("Failed to encrypt message %s", err)
+				ciphertext = []byte{}
+			}
+			resp.Write(encoder.Encode(ciphertext))
 		}
 	}
 }
