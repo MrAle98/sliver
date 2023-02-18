@@ -3,17 +3,14 @@ package pivots
 /*
 	Sliver Implant Framework
 	Copyright (C) 2021  Bishop Fox
-
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
-
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
@@ -23,8 +20,10 @@ import (
 	"fmt"
 
 	"github.com/bishopfox/sliver/client/console"
+	"github.com/bishopfox/sliver/protobuf/clientpb"
 	"github.com/bishopfox/sliver/protobuf/sliverpb"
 	"github.com/desertbit/grumble"
+	"google.golang.org/protobuf/proto"
 )
 
 // StartTCPListenerCmd - Start a TCP pivot listener on the remote system
@@ -53,10 +52,11 @@ func StartTCPListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient)
 
 // StartNamedPipeListenerCmd - Start a TCP pivot listener on the remote system
 func StartNamedPipeListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
-	session := con.ActiveTarget.GetSessionInteractive()
-	if session == nil {
+	session, beacon := con.ActiveTarget.GetInteractive()
+	if session == nil && beacon == nil {
 		return
 	}
+
 	var options []bool
 	options = append(options, ctx.Flags.Bool("allow-all"))
 	listener, err := con.Rpc.PivotStartListener(context.Background(), &sliverpb.PivotStartListenerReq{
@@ -69,9 +69,25 @@ func StartNamedPipeListenerCmd(ctx *grumble.Context, con *console.SliverConsoleC
 		con.PrintErrorf("%s\n", err)
 		return
 	}
-	if listener.Response != nil && listener.Response.Err != "" {
-		con.PrintErrorf("%s\n", listener.Response.Err)
-		return
+	if listener.Response != nil && listener.Response.Async {
+		con.AddBeaconCallback(listener.Response.TaskID, func(task *clientpb.BeaconTask) {
+			err = proto.Unmarshal(task.Response, listener)
+			if err != nil {
+				con.PrintErrorf("Failed to decode response %s\n", err)
+				return
+			}
+			if listener.Response != nil && listener.Response.Err != "" {
+				con.PrintErrorf("%s\n", listener.Response.Err)
+				return
+			}
+			con.PrintInfof("Started named pipe pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
+		})
+		con.PrintAsyncResponse(listener.Response)
+	} else {
+		if listener.Response != nil && listener.Response.Err != "" {
+			con.PrintErrorf("%s\n", listener.Response.Err)
+			return
+		}
+		con.PrintInfof("Started named pipe pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
 	}
-	con.PrintInfof("Started named pipe pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
 }
