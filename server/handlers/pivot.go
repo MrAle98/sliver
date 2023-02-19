@@ -110,7 +110,12 @@ func sessionEnvelopeHandler(implantConn *core.ImplantConnection, peerEnvelope *s
 	if respEnvelope == nil {
 		return nil
 	}
-	ciphertext, err := pivot.CipherCtx.Encrypt(respEnvelope.Data)
+	plaintext, err = proto.Marshal(respEnvelope)
+	if err != nil {
+		pivotLog.Errorf("failed to marshal pivot session data: %v", err)
+		return nil
+	}
+	ciphertext, err := pivot.CipherCtx.Encrypt(plaintext)
 	if err != nil {
 		pivotLog.Errorf("failed to re-encrypt pivot session data: %v", err)
 		return nil
@@ -275,7 +280,7 @@ func serverKeyExchange(implantConn *core.ImplantConnection, peerEnvelope *sliver
 		return nil
 	}
 
-	pivotSession.Start()
+	//pivotSession.Start()
 	return &sliverpb.Envelope{
 		Type: sliverpb.MsgPivotPeerEnvelope,
 		Data: peerEnvelopeData,
