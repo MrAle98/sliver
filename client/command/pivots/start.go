@@ -28,8 +28,8 @@ import (
 
 // StartTCPListenerCmd - Start a TCP pivot listener on the remote system
 func StartTCPListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
-	session := con.ActiveTarget.GetSessionInteractive()
-	if session == nil {
+	session, beacon := con.ActiveTarget.GetInteractive()
+	if session == nil && beacon == nil {
 		return
 	}
 	bind := ctx.Flags.String("bind")
@@ -39,15 +39,27 @@ func StartTCPListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient)
 		BindAddress: fmt.Sprintf("%s:%d", bind, lport),
 		Request:     con.ActiveTarget.Request(ctx),
 	})
-	if err != nil {
-		con.PrintErrorf("%s\n", err)
-		return
+	if listener.Response != nil && listener.Response.Async {
+		con.AddBeaconCallback(listener.Response.TaskID, func(task *clientpb.BeaconTask) {
+			err = proto.Unmarshal(task.Response, listener)
+			if err != nil {
+				con.PrintErrorf("Failed to decode response %s\n", err)
+				return
+			}
+			if listener.Response != nil && listener.Response.Err != "" {
+				con.PrintErrorf("%s\n", listener.Response.Err)
+				return
+			}
+			con.PrintInfof("Started tcp pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
+		})
+		con.PrintAsyncResponse(listener.Response)
+	} else {
+		if listener.Response != nil && listener.Response.Err != "" {
+			con.PrintErrorf("%s\n", listener.Response.Err)
+			return
+		}
+		con.PrintInfof("Started tcp pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
 	}
-	if listener.Response != nil && listener.Response.Err != "" {
-		con.PrintErrorf("%s\n", listener.Response.Err)
-		return
-	}
-	con.PrintInfof("Started tcp pivot listener %s with id %d\n", listener.BindAddress, listener.ID)
 }
 
 // StartNamedPipeListenerCmd - Start a TCP pivot listener on the remote system
