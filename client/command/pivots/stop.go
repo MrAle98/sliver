@@ -73,7 +73,7 @@ func StopPivotListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient
 				con.PrintErrorf("%s\n", resp.Response.Err)
 				return
 			}
-			con.PrintInfof("Stopped pipe pivot listener %s with id %d\n", resp.BindAddress, resp.ID)
+			con.PrintInfof("Stopped pivot listener %s with id %d\n", resp.BindAddress, resp.ID)
 		})
 		con.PrintAsyncResponse(resp.Response)
 	} else {

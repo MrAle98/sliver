@@ -62,16 +62,17 @@ func PivotsCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
 			}
 		})
 		con.PrintAsyncResponse(pivotListeners.Response)
-	}
-	if pivotListeners.Response != nil && pivotListeners.Response.Err != "" {
-		con.PrintErrorf("%s\n", pivotListeners.Response.Err)
-		return
-	}
-
-	if len(pivotListeners.Listeners) == 0 {
-		con.PrintInfof("No pivot listeners running on this session\n")
 	} else {
-		PrintPivotListeners(pivotListeners.Listeners, con)
+		if pivotListeners.Response != nil && pivotListeners.Response.Err != "" {
+			con.PrintErrorf("%s\n", pivotListeners.Response.Err)
+			return
+		}
+
+		if len(pivotListeners.Listeners) == 0 {
+			con.PrintInfof("No pivot listeners running on this session\n")
+		} else {
+			PrintPivotListeners(pivotListeners.Listeners, con)
+		}
 	}
 }
 
