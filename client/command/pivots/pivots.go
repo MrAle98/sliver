@@ -23,16 +23,18 @@ import (
 
 	"github.com/bishopfox/sliver/client/command/settings"
 	"github.com/bishopfox/sliver/client/console"
+	"github.com/bishopfox/sliver/protobuf/clientpb"
 	"github.com/bishopfox/sliver/protobuf/sliverpb"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/desertbit/grumble"
 )
 
 // PivotsCmd - Display pivots for all sessions
 func PivotsCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
-	session := con.ActiveTarget.GetSessionInteractive()
-	if session == nil {
+	session, beacon := con.ActiveTarget.GetInteractive()
+	if session == nil && beacon == nil {
 		return
 	}
 	pivotListeners, err := con.Rpc.PivotSessionListeners(context.Background(), &sliverpb.PivotListenersReq{
@@ -41,6 +43,25 @@ func PivotsCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
 	if err != nil {
 		con.PrintErrorf("%s\n", err)
 		return
+	}
+	if pivotListeners.Response != nil && pivotListeners.Response.Async {
+		con.AddBeaconCallback(pivotListeners.Response.TaskID, func(task *clientpb.BeaconTask) {
+			err = proto.Unmarshal(task.Response, pivotListeners)
+			if err != nil {
+				con.PrintErrorf("Failed to decode response %s\n", err)
+				return
+			}
+			if pivotListeners.Response != nil && pivotListeners.Response.Err != "" {
+				con.PrintErrorf("%s\n", pivotListeners.Response.Err)
+				return
+			}
+			if len(pivotListeners.Listeners) == 0 {
+				con.PrintInfof("No pivot listeners running on this session\n")
+			} else {
+				PrintPivotListeners(pivotListeners.Listeners, con)
+			}
+		})
+		con.PrintAsyncResponse(pivotListeners.Response)
 	}
 	if pivotListeners.Response != nil && pivotListeners.Response.Err != "" {
 		con.PrintErrorf("%s\n", pivotListeners.Response.Err)

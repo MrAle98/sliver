@@ -22,14 +22,16 @@ import (
 	"context"
 
 	"github.com/bishopfox/sliver/client/console"
+	"github.com/bishopfox/sliver/protobuf/clientpb"
 	"github.com/bishopfox/sliver/protobuf/sliverpb"
 	"github.com/desertbit/grumble"
+	"google.golang.org/protobuf/proto"
 )
 
 // StopPivotListenerCmd - Start a TCP pivot listener on the remote system
 func StopPivotListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
-	session := con.ActiveTarget.GetSessionInteractive()
-	if session == nil {
+	session, beacon := con.ActiveTarget.GetInteractive()
+	if session == nil && beacon == nil {
 		return
 	}
 	id := uint32(ctx.Flags.Int("id"))
@@ -52,7 +54,7 @@ func StopPivotListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient
 		}
 		id = selectedListener.ID
 	}
-	_, err := con.Rpc.PivotStopListener(context.Background(), &sliverpb.PivotStopListenerReq{
+	resp, err := con.Rpc.PivotStopListener(context.Background(), &sliverpb.PivotStopListenerReq{
 		ID:      id,
 		Request: con.ActiveTarget.Request(ctx),
 	})
@@ -60,5 +62,21 @@ func StopPivotListenerCmd(ctx *grumble.Context, con *console.SliverConsoleClient
 		con.PrintErrorf("%s\n", err)
 		return
 	}
-	con.PrintInfof("Stopped pivot listener\n")
+	if resp.Response != nil && resp.Response.Async {
+		con.AddBeaconCallback(resp.Response.TaskID, func(task *clientpb.BeaconTask) {
+			err = proto.Unmarshal(task.Response, resp)
+			if err != nil {
+				con.PrintErrorf("Failed to decode response %s\n", err)
+				return
+			}
+			if resp.Response != nil && resp.Response.Err != "" {
+				con.PrintErrorf("%s\n", resp.Response.Err)
+				return
+			}
+			con.PrintInfof("Stopped pipe pivot listener %s with id %d\n", resp.BindAddress, resp.ID)
+		})
+		con.PrintAsyncResponse(resp.Response)
+	} else {
+		con.PrintInfof("Stopped pivot listener\n")
+	}
 }

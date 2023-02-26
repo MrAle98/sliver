@@ -131,7 +131,7 @@ service SliverRPC {
     
     // *** Pivots ***
     rpc PivotStartListener(sliverpb.PivotStartListenerReq) returns (sliverpb.PivotListener);
-    rpc PivotStopListener(sliverpb.PivotStopListenerReq) returns (commonpb.Empty);
+    rpc PivotStopListener(sliverpb.PivotStopListenerReq) returns (sliverpb.PivotListener);
     rpc PivotSessionListeners(sliverpb.PivotListenersReq) returns (sliverpb.PivotListeners);
     rpc PivotGraph(commonpb.Empty) returns (clientpb.PivotGraph);
 

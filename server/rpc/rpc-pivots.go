@@ -59,11 +59,11 @@ func (rpc *Server) PivotStartListener(ctx context.Context, req *sliverpb.PivotSt
 }
 
 // PivotStopListener - Instruct the implant to stop a pivot listener
-func (rpc *Server) PivotStopListener(ctx context.Context, req *sliverpb.PivotStopListenerReq) (*commonpb.Empty, error) {
+func (rpc *Server) PivotStopListener(ctx context.Context, req *sliverpb.PivotStopListenerReq) (*sliverpb.PivotListener, error) {
 	resp := &sliverpb.PivotListener{Response: &commonpb.Response{}}
 	err := rpc.GenericHandler(req, resp)
 	if err != nil {
 		return nil, err
 	}
-	return &commonpb.Empty{}, nil
+	return resp, nil
 }
