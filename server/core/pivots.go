@@ -24,6 +24,7 @@ import (
 	"github.com/bishopfox/sliver/protobuf/clientpb"
 	"github.com/bishopfox/sliver/protobuf/sliverpb"
 	"github.com/bishopfox/sliver/server/cryptography"
+	"github.com/bishopfox/sliver/server/db"
 	"github.com/gofrs/uuid"
 	"google.golang.org/protobuf/proto"
 )
@@ -176,6 +177,19 @@ func PivotGraph() []*PivotGraphEntry {
 			Children:  make(map[int64]*PivotGraphEntry),
 		})
 	}
+	beacons, _ := db.ListBeacons()
+
+	for _, beacon := range beacons {
+		if beacon.Transport == PivotTransportName {
+			continue
+		}
+		graph = append(graph, &PivotGraphEntry{
+			PeerID:    beacon.PeerID,
+			SessionID: beacon.ID.String(),
+			Name:      beacon.Name,
+			Children:  make(map[int64]*PivotGraphEntry),
+		})
+	}
 	for _, topLevel := range graph {
 		coreLog.Debugf("[graph] top level: %v", topLevel)
 		insertImmediateChildren(topLevel, 1)
@@ -197,16 +211,31 @@ func insertImmediateChildren(entry *PivotGraphEntry, depth int) {
 			return true
 		}
 		session := Sessions.FromImplantConnection(pivot.ImplantConn)
-		if session == nil {
-			coreLog.Warnf("[graph] session not found for pivot: %v", pivot)
+		if session != nil {
+			coreLog.Debugf("[graph] entry: %v, pivot: %v", entry.Name, pivot)
+			if pivot.Peers[1].PeerID == entry.PeerID {
+				child := &PivotGraphEntry{
+					PeerID:    pivot.OriginID,
+					SessionID: session.ID,
+					Name:      session.Name,
+					Children:  make(map[int64]*PivotGraphEntry),
+				}
+				coreLog.Debugf("[graph] entry: %v, found child: %v", entry.Name, child.Name)
+				entry.Insert(child)
+			}
+			return true
+		}
+		beacon, err := db.BeaconByImplantConnID(pivot.ImplantConn.ID)
+		if err != nil {
+			coreLog.Warnf("[graph] beacon not found for pivot: %v", pivot)
 			return true
 		}
 		coreLog.Debugf("[graph] entry: %v, pivot: %v", entry.Name, pivot)
 		if pivot.Peers[1].PeerID == entry.PeerID {
 			child := &PivotGraphEntry{
 				PeerID:    pivot.OriginID,
-				SessionID: session.ID,
-				Name:      session.Name,
+				SessionID: beacon.ID.String(),
+				Name:      beacon.Name,
 				Children:  make(map[int64]*PivotGraphEntry),
 			}
 			coreLog.Debugf("[graph] entry: %v, found child: %v", entry.Name, child.Name)

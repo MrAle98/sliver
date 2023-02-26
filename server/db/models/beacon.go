@@ -53,14 +53,13 @@ type Beacon struct {
 	ActiveC2          string
 	ProxyURL          string
 	Locale            string
-
-	ImplantBuildID uuid.UUID `gorm:"type:uuid;"`
-
-	Interval    int64
-	Jitter      int64
-	NextCheckin int64
-
-	Tasks []BeaconTask
+	ImplantBuildID    uuid.UUID `gorm:"type:uuid;"`
+	PeerID            int64
+	ImplantConnID     string
+	Interval          int64
+	Jitter            int64
+	NextCheckin       int64
+	Tasks             []BeaconTask
 }
 
 // BeforeCreate - GORM hook

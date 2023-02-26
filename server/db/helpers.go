@@ -333,6 +333,18 @@ func BeaconByID(id string) (*models.Beacon, error) {
 	return beacon, err
 }
 
+// BeaconByID - Select a Beacon by ImplantConnID
+func BeaconByImplantConnID(id string) (*models.Beacon, error) {
+	if len(id) < 1 {
+		return nil, ErrRecordNotFound
+	}
+	beacon := &models.Beacon{}
+	err := Session().Where(
+		&models.Beacon{ImplantConnID: id},
+	).First(beacon).Error
+	return beacon, err
+}
+
 // BeaconTasksByBeaconID - Get all tasks for a specific beacon
 // by default will not fetch the request/response columns since
 // these could be arbitrarily large.
