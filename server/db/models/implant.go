@@ -154,6 +154,10 @@ func (ic *ImplantConfig) ToProtobuf() *clientpb.ImplantConfig {
 		GOOS:   ic.GOOS,
 		GOARCH: ic.GOARCH,
 
+		ECCServerPublicKey: ic.ECCServerPublicKey,
+		ECCPublicKey:       ic.ECCPublicKey,
+		ECCPrivateKey:      ic.ECCPrivateKey,
+
 		MtlsCACert: ic.MtlsCACert,
 		MtlsCert:   ic.MtlsCert,
 		MtlsKey:    ic.MtlsKey,
