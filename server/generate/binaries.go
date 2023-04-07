@@ -23,16 +23,16 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io/fs"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"text/template"
 
-	"github.com/bishopfox/sliver/implant"
 	"github.com/bishopfox/sliver/protobuf/clientpb"
 	"github.com/bishopfox/sliver/server/assets"
 	"github.com/bishopfox/sliver/server/certs"
@@ -330,24 +330,11 @@ func SliverShellcode(name string, otpSecret string, config *models.ImplantConfig
 // SliverSharedLibrary - Generates a sliver shared library (DLL/dylib/so) binary
 func SliverSharedLibrary(name string, otpSecret string, config *models.ImplantConfig, save bool) (string, error) {
 	// Compile go code
-	var cc string
-	var cxx string
-
 	appDir := assets.GetRootAppDir()
 	// Don't use a cross-compiler if the target bin is built on the same platform
 	// as the sliver-server.
-	if runtime.GOOS != config.GOOS {
-		buildLog.Debugf("Cross-compiling from %s/%s to %s/%s", runtime.GOOS, runtime.GOARCH, config.GOOS, config.GOARCH)
-		cc, cxx = findCrossCompilers(config.GOOS, config.GOARCH)
-		if cc == "" {
-			return "", fmt.Errorf("CC '%s/%s' not found", config.GOOS, config.GOARCH)
-		}
-	}
 	goConfig := &gogo.GoConfig{
-		CGO: "1",
-		CC:  cc,
-		CXX: cxx,
-
+		CGO:        "1",
 		GOOS:       config.GOOS,
 		GOARCH:     config.GOARCH,
 		GOCACHE:    gogo.GetGoCache(appDir),
@@ -364,38 +351,32 @@ func SliverSharedLibrary(name string, otpSecret string, config *models.ImplantCo
 	if err != nil {
 		return "", err
 	}
+	str := ""
+	if config.HTTPc2Enabled {
+		str = "x64-release-http-dll x64-windows-release-http-dll"
+	} else if config.NamePipec2Enabled {
+		str = "x64-release-pivot-smb-dll x64-windows-release-pivot-smb-dll"
+	} else if config.TCPPivotc2Enabled {
+		str = "x64-release-pivot-tcp-dll x64-windows-release-pivot-tcp-dll"
+	}
+	command := fmt.Sprintf("cd %sSliver-CPPImplant2-asset\\ && compile.bat %s", pkgPath, str)
+	out, err := exec.Command("cmd.exe", "/c", command).Output()
+	outstring := string(out)
+	re := regexp.MustCompile(`Build files have been written to: (.*)`)
+	re2 := regexp.MustCompile(`Linking CXX executable (.*)`)
+	matches := re.FindAllStringSubmatch(outstring, -1)
+	out_basepath := strings.Trim(strings.Replace(matches[0][1], "/", "\\", -1), "\r\n")
+	matches = re2.FindAllStringSubmatch(outstring, -1)
+	outfilename := strings.Trim(matches[0][1], "\r\n")
+	out_basepath += "\\"
+	out_basepath += outfilename
 
+	filename := out_basepath
+	input, err := os.ReadFile(filename)
 	dest := filepath.Join(goConfig.ProjectDir, "bin", filepath.Base(name))
-	if goConfig.GOOS == WINDOWS {
-		dest += ".dll"
-	}
-	if goConfig.GOOS == DARWIN {
-		dest += ".dylib"
-	}
-	if goConfig.GOOS == LINUX {
-		dest += ".so"
-	}
-
-	tags := []string{} // []string{"netgo"}
-	ldflags := []string{"-s -w -buildid="}
-	if !config.Debug && goConfig.GOOS == WINDOWS {
-		ldflags[0] += " -H=windowsgui"
-	}
-	// Statically link Linux .so files to avoid glibc hell
-	if goConfig.GOOS == LINUX && goConfig.CC != "" && goConfig.CGO == "1" {
-		ldflags[0] += " -linkmode external -extldflags \"-static\""
-	}
-	// Keep those for potential later use
-	gcflags := ""
-	asmflags := ""
-	// trimpath is now a separate flag since Go 1.13
-	trimpath := "-trimpath"
-	_, err = gogo.GoBuild(*goConfig, pkgPath, dest, "c-shared", tags, ldflags, gcflags, asmflags, trimpath)
-	if err != nil {
-		return "", err
-	}
+	dest += ".dll"
+	os.WriteFile(dest, input, 0644)
 	config.FileName = filepath.Base(dest)
-
 	if save {
 		err = ImplantBuildSave(name, config, dest)
 		if err != nil {
@@ -433,31 +414,52 @@ func SliverExecutable(name string, otpSecret string, config *models.ImplantConfi
 	if err != nil {
 		return "", err
 	}
+	str := ""
+	if config.HTTPc2Enabled {
+		str = "x64-release-http x64-windows-release-http"
+	} else if config.NamePipec2Enabled {
+		str = "x64-release-pivot-smb x64-windows-release-pivot-smb"
+	} else if config.TCPPivotc2Enabled {
+		str = "x64-release-pivot-tcp x64-windows-release-pivot-tcp"
+	}
+	command := fmt.Sprintf("cd %sSliver-CPPImplant2-asset\\ && compile.bat %s", pkgPath, str)
+	out, err := exec.Command("cmd.exe", "/c", command).Output()
+	outstring := string(out)
+	//fmt.Print(outstring)
+	re := regexp.MustCompile(`Build files have been written to: (.*)`)
+	re2 := regexp.MustCompile(`Linking CXX executable (.*)`)
+	matches := re.FindAllStringSubmatch(outstring, -1)
+	out_basepath := strings.Trim(strings.Replace(matches[0][1], "/", "\\", -1), "\r\n")
+	matches = re2.FindAllStringSubmatch(outstring, -1)
+	outfilename := strings.Trim(matches[0][1], "\r\n")
+	out_basepath += "\\"
+	out_basepath += outfilename
 
+	filename := out_basepath
+	input, err := os.ReadFile(filename)
 	dest := filepath.Join(goConfig.ProjectDir, "bin", filepath.Base(name))
-	if goConfig.GOOS == WINDOWS {
-		dest += ".exe"
-	}
-	tags := []string{} // []string{"netgo"}
-	ldflags := []string{"-s -w -buildid="}
-	if !config.Debug && goConfig.GOOS == WINDOWS {
-		ldflags[0] += " -H=windowsgui"
-	}
-	gcflags := ""
-	asmflags := ""
-	if config.Debug {
-		gcflags = "all=-N -l"
-		ldflags = []string{}
-	}
-	// trimpath is now a separate flag since Go 1.13
-	trimpath := ""
-	if !config.Debug {
-		trimpath = "-trimpath"
-	}
-	_, err = gogo.GoBuild(*goConfig, pkgPath, dest, "", tags, ldflags, gcflags, asmflags, trimpath)
-	if err != nil {
-		return "", err
-	}
+	dest += ".exe"
+	os.WriteFile(dest, input, 0644)
+	// tags := []string{} // []string{"netgo"}
+	// ldflags := []string{"-s -w -buildid="}
+	// if !config.Debug && goConfig.GOOS == WINDOWS {
+	// 	ldflags[0] += " -H=windowsgui"
+	// }
+	// gcflags := ""
+	// asmflags := ""
+	// if config.Debug {
+	// 	gcflags = "all=-N -l"
+	// 	ldflags = []string{}
+	// }
+	// // trimpath is now a separate flag since Go 1.13
+	// trimpath := ""
+	// if !config.Debug {
+	// 	trimpath = "-trimpath"
+	// }
+	// _, err = gogo.GoBuild(*goConfig, pkgPath, dest, "", tags, ldflags, gcflags, asmflags, trimpath)
+	// if err != nil {
+	// 	return "", err
+	// }
 	config.FileName = filepath.Base(dest)
 	if save {
 		err = ImplantBuildSave(name, config, dest)
@@ -470,13 +472,13 @@ func SliverExecutable(name string, otpSecret string, config *models.ImplantConfi
 
 // This function is a little too long, we should probably refactor it as some point
 func renderSliverGoCode(name string, otpSecret string, config *models.ImplantConfig, goConfig *gogo.GoConfig) (string, error) {
-	target := fmt.Sprintf("%s/%s", config.GOOS, config.GOARCH)
-	if _, ok := gogo.ValidCompilerTargets(*goConfig)[target]; !ok {
-		return "", fmt.Errorf("invalid compiler target: %s", target)
-	}
-	if name == "" {
-		return "", fmt.Errorf("name cannot be empty")
-	}
+	//target := fmt.Sprintf("%s/%s", config.GOOS, config.GOARCH)
+	// if _, ok := gogo.ValidCompilerTargets(*goConfig)[target]; !ok {
+	// 	return "", fmt.Errorf("invalid compiler target: %s", target)
+	// }
+	// if name == "" {
+	// 	return "", fmt.Errorf("name cannot be empty")
+	// }
 
 	buildLog.Debugf("Generating new sliver binary '%s'", name)
 
@@ -505,33 +507,21 @@ func renderSliverGoCode(name string, otpSecret string, config *models.ImplantCon
 	if err != nil {
 		return "", nil
 	}
-
-	err = fs.WalkDir(implant.FS, ".", func(fsPath string, f fs.DirEntry, err error) error {
-		if f.IsDir() {
-			return nil
-		}
-		buildLog.Debugf("Walking: %s %s %v", fsPath, f.Name(), err)
-
-		sliverGoCodeRaw, err := implant.FS.ReadFile(fsPath)
+	sliverPkgDir = "C:\\temp\\"
+	err = filepath.Walk("C:\\Sliver-CPPImplant2-asset\\", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			buildLog.Errorf("Failed to read %s: %s", fsPath, err)
+			return err
+		}
+		if info.IsDir() {
 			return nil
 		}
-		sliverGoCode := string(sliverGoCodeRaw)
-
-		// Skip dllmain files for anything non windows
-		if f.Name() == "sliver.c" || f.Name() == "sliver.h" {
-			if !config.IsSharedLib && !config.IsShellcode {
-				return nil
-			}
+		codeRaw, err := os.ReadFile(path)
+		if err != nil {
+			buildLog.Errorf("Failed to read %s: %s", path, err)
+			return nil
 		}
-
-		var sliverCodePath string
-		if f.Name() == "sliver.go" || f.Name() == "sliver.c" || f.Name() == "sliver.h" {
-			sliverCodePath = filepath.Join(sliverPkgDir, f.Name())
-		} else {
-			sliverCodePath = filepath.Join(sliverPkgDir, "implant", fsPath)
-		}
+		code := string(codeRaw)
+		sliverCodePath := filepath.Join(sliverPkgDir, strings.TrimPrefix(path, "C:\\"))
 		dirPath := filepath.Dir(sliverCodePath)
 		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 			buildLog.Debugf("[mkdir] %#v", dirPath)
@@ -545,17 +535,9 @@ func renderSliverGoCode(name string, otpSecret string, config *models.ImplantCon
 			return err
 		}
 		buf := bytes.NewBuffer([]byte{})
-		buildLog.Debugf("[render] %s -> %s", f.Name(), sliverCodePath)
-
-		// --------------
-		// Render Code
-		// --------------
+		buildLog.Debugf("[render] %s -> %s", info.Name(), sliverCodePath)
 		sliverCodeTmpl := template.New("sliver")
-		sliverCodeTmpl, err = sliverCodeTmpl.Funcs(template.FuncMap{
-			"GenerateUserAgent": func() string {
-				return configs.GetHTTPC2Config().GenerateUserAgent(config.GOOS, config.GOARCH)
-			},
-		}).Parse(sliverGoCode)
+		sliverCodeTmpl, err = sliverCodeTmpl.Parse(code)
 		if err != nil {
 			buildLog.Errorf("Template parsing error %s", err)
 			return err
@@ -575,68 +557,141 @@ func renderSliverGoCode(name string, otpSecret string, config *models.ImplantCon
 			buildLog.Errorf("Template execution error %s", err)
 			return err
 		}
-
-		// Render canaries
-		if len(config.CanaryDomains) > 0 {
-			buildLog.Debugf("Canary domain(s): %v", config.CanaryDomains)
-		}
-		canaryTmpl := template.New("canary").Delims("[[", "]]")
-		canaryGenerator := &CanaryGenerator{
-			ImplantName:   name,
-			ParentDomains: config.CanaryDomainsList(),
-		}
-		canaryTmpl, err = canaryTmpl.Funcs(template.FuncMap{
-			"GenerateCanary": canaryGenerator.GenerateCanary,
-		}).Parse(buf.String())
-		if err != nil {
-			return err
-		}
-		err = canaryTmpl.Execute(fSliver, canaryGenerator)
-
-		if err != nil {
-			buildLog.Debugf("Failed to render go code: %s", err)
-			return err
-		}
+		fSliver.Write(buf.Bytes())
+		fSliver.Close()
 		return nil
 	})
+	// err = fs.WalkDir(implant.FS, ".", func(fsPath string, f fs.DirEntry, err error) error {
+	// 	if f.IsDir() {
+	// 		return nil
+	// 	}
+	// 	buildLog.Debugf("Walking: %s %s %v", fsPath, f.Name(), err)
+
+	// 	sliverGoCodeRaw, err := implant.FS.ReadFile(fsPath)
+	// 	if err != nil {
+	// 		buildLog.Errorf("Failed to read %s: %s", fsPath, err)
+	// 		return nil
+	// 	}
+	// 	sliverGoCode := string(sliverGoCodeRaw)
+
+	// 	// Skip dllmain files for anything non windows
+	// 	if f.Name() == "sliver.c" || f.Name() == "sliver.h" {
+	// 		if !config.IsSharedLib && !config.IsShellcode {
+	// 			return nil
+	// 		}
+	// 	}
+
+	// 	var sliverCodePath string
+	// 	if f.Name() == "sliver.go" || f.Name() == "sliver.c" || f.Name() == "sliver.h" {
+	// 		sliverCodePath = filepath.Join(sliverPkgDir, f.Name())
+	// 	} else {
+	// 		sliverCodePath = filepath.Join(sliverPkgDir, "implant", fsPath)
+	// 	}
+	// 	dirPath := filepath.Dir(sliverCodePath)
+	// 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+	// 		buildLog.Debugf("[mkdir] %#v", dirPath)
+	// 		err = os.MkdirAll(dirPath, 0700)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// 	fSliver, err := os.Create(sliverCodePath)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	buf := bytes.NewBuffer([]byte{})
+	// 	buildLog.Debugf("[render] %s -> %s", f.Name(), sliverCodePath)
+
+	// 	// --------------
+	// 	// Render Code
+	// 	// --------------
+	// 	sliverCodeTmpl := template.New("sliver")
+	// 	sliverCodeTmpl, err = sliverCodeTmpl.Funcs(template.FuncMap{
+	// 		"GenerateUserAgent": func() string {
+	// 			return configs.GetHTTPC2Config().GenerateUserAgent(config.GOOS, config.GOARCH)
+	// 		},
+	// 	}).Parse(sliverGoCode)
+	// 	if err != nil {
+	// 		buildLog.Errorf("Template parsing error %s", err)
+	// 		return err
+	// 	}
+	// 	err = sliverCodeTmpl.Execute(buf, struct {
+	// 		Name                string
+	// 		Config              *models.ImplantConfig
+	// 		OTPSecret           string
+	// 		HTTPC2ImplantConfig *configs.HTTPC2ImplantConfig
+	// 	}{
+	// 		name,
+	// 		config,
+	// 		otpSecret,
+	// 		configs.GetHTTPC2Config().RandomImplantConfig(),
+	// 	})
+	// 	if err != nil {
+	// 		buildLog.Errorf("Template execution error %s", err)
+	// 		return err
+	// 	}
+
+	// 	// Render canaries
+	// 	if len(config.CanaryDomains) > 0 {
+	// 		buildLog.Debugf("Canary domain(s): %v", config.CanaryDomains)
+	// 	}
+	// 	canaryTmpl := template.New("canary").Delims("[[", "]]")
+	// 	canaryGenerator := &CanaryGenerator{
+	// 		ImplantName:   name,
+	// 		ParentDomains: config.CanaryDomainsList(),
+	// 	}
+	// 	canaryTmpl, err = canaryTmpl.Funcs(template.FuncMap{
+	// 		"GenerateCanary": canaryGenerator.GenerateCanary,
+	// 	}).Parse(buf.String())
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	err = canaryTmpl.Execute(fSliver, canaryGenerator)
+
+	// 	if err != nil {
+	// 		buildLog.Debugf("Failed to render go code: %s", err)
+	// 		return err
+	// 	}
+	// 	return nil
+	// })
 	if err != nil {
 		return "", err
 	}
 
 	// Render GoMod
-	buildLog.Info("Rendering go.mod file ...")
-	goModPath := filepath.Join(sliverPkgDir, "go.mod")
-	err = os.WriteFile(goModPath, []byte(implant.GoMod), 0600)
-	if err != nil {
-		return "", err
-	}
-	goSumPath := filepath.Join(sliverPkgDir, "go.sum")
-	err = os.WriteFile(goSumPath, []byte(implant.GoSum), 0600)
-	if err != nil {
-		return "", err
-	}
+	// buildLog.Info("Rendering go.mod file ...")
+	// goModPath := filepath.Join(sliverPkgDir, "go.mod")
+	// err = os.WriteFile(goModPath, []byte(implant.GoMod), 0600)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// goSumPath := filepath.Join(sliverPkgDir, "go.sum")
+	// err = os.WriteFile(goSumPath, []byte(implant.GoSum), 0600)
+	// if err != nil {
+	// 	return "", err
+	// }
 	// Render vendor dir
-	err = fs.WalkDir(implant.Vendor, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
+	// err = fs.WalkDir(implant.Vendor, ".", func(path string, d fs.DirEntry, err error) error {
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		if d.IsDir() {
-			return os.MkdirAll(filepath.Join(sliverPkgDir, path), 0700)
-		}
+	// 	if d.IsDir() {
+	// 		return os.MkdirAll(filepath.Join(sliverPkgDir, path), 0700)
+	// 	}
 
-		contents, err := implant.Vendor.ReadFile(path)
-		if err != nil {
-			return err
-		}
+	// 	contents, err := implant.Vendor.ReadFile(path)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		return os.WriteFile(filepath.Join(sliverPkgDir, path), contents, 0600)
-	})
-	if err != nil {
-		buildLog.Errorf("Failed to copy vendor directory %v", err)
-		return "", err
-	}
-	buildLog.Debugf("Created %s", goModPath)
+	// 	return os.WriteFile(filepath.Join(sliverPkgDir, path), contents, 0600)
+	// })
+	// if err != nil {
+	// 	buildLog.Errorf("Failed to copy vendor directory %v", err)
+	// 	return "", err
+	// }
+	// buildLog.Debugf("Created %s", goModPath)
 
 	return sliverPkgDir, nil
 }
