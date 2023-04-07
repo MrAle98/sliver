@@ -363,7 +363,7 @@ func SliverSharedLibrary(name string, otpSecret string, config *models.ImplantCo
 	out, err := exec.Command("cmd.exe", "/c", command).Output()
 	outstring := string(out)
 	re := regexp.MustCompile(`Build files have been written to: (.*)`)
-	re2 := regexp.MustCompile(`Linking CXX executable (.*)`)
+	re2 := regexp.MustCompile(`Linking CXX shared library (.*)`)
 	matches := re.FindAllStringSubmatch(outstring, -1)
 	out_basepath := strings.Trim(strings.Replace(matches[0][1], "/", "\\", -1), "\r\n")
 	matches = re2.FindAllStringSubmatch(outstring, -1)
