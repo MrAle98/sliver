@@ -106,6 +106,12 @@ func ExecuteCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
 
 func HandleExecuteResponse(exec *sliverpb.Execute, cmdPath string, hostName string, ctx *grumble.Context, con *console.SliverConsoleClient) {
 	var lootedOutput []byte
+	if exec.Response != nil {
+		if exec.Response.Err != "" {
+			con.PrintErrorf("Command returned the following error:\n%s\n", exec.Response.Err)
+			return
+		}
+	}
 	stdout := ctx.Flags.String("stdout")
 	saveLoot := ctx.Flags.Bool("loot")
 	saveOutput := ctx.Flags.Bool("save")
