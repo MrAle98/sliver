@@ -258,6 +258,9 @@ const (
 	CursedCookies  = "cookies"
 
 	BuildersStr = "builders"
+
+	PowerShellImportStr  = "powershell-import"
+	PowerShellExecuteStr = "powershell"
 )
 
 // Groups
