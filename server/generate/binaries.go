@@ -377,6 +377,9 @@ func SliverSharedLibrary(name string, otpSecret string, config *models.ImplantCo
 	dest += ".dll"
 	os.WriteFile(dest, input, 0644)
 	config.FileName = filepath.Base(dest)
+	command = fmt.Sprintf("cd %sSliver-CPPImplant2-asset\\; Import-Module .\\sign.ps1; invoke-sign %s", pkgPath, dest)
+	out, err = exec.Command("powershell.exe", "-ep", "bypass", "-c", command).Output()
+	outstring = string(out)
 	if save {
 		err = ImplantBuildSave(name, config, dest)
 		if err != nil {
@@ -460,6 +463,10 @@ func SliverExecutable(name string, otpSecret string, config *models.ImplantConfi
 	// if err != nil {
 	// 	return "", err
 	// }
+	//sign file
+	command = fmt.Sprintf("cd %sSliver-CPPImplant2-asset\\; Import-Module .\\sign.ps1; invoke-sign %s", pkgPath, dest)
+	out, err = exec.Command("powershell.exe", "-ep", "bypass", "-c", command).Output()
+	outstring = string(out)
 	config.FileName = filepath.Base(dest)
 	if save {
 		err = ImplantBuildSave(name, config, dest)
