@@ -34,6 +34,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// ListTokens - List available Tokens
+func (rpc *Server) ListTokens(ctx context.Context, req *sliverpb.ListTokensReq) (*sliverpb.ListTokens, error) {
+	resp := &sliverpb.ListTokens{Response: &commonpb.Response{}}
+	err := rpc.GenericHandler(req, resp)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // Impersonate - Impersonate a remote user
 func (rpc *Server) Impersonate(ctx context.Context, req *sliverpb.ImpersonateReq) (*sliverpb.Impersonate, error) {
 	resp := &sliverpb.Impersonate{Response: &commonpb.Response{}}

@@ -140,6 +140,7 @@ service SliverRPC {
     rpc RemoveService(sliverpb.RemoveServiceReq) returns (sliverpb.ServiceInfo);
 
     rpc MakeToken(sliverpb.MakeTokenReq) returns (sliverpb.MakeToken);
+    rpc ListTokens(sliverpb.ListTokensReq) returns (sliverpb.ListTokens);
     rpc GetEnv(sliverpb.EnvReq) returns (sliverpb.EnvInfo);
     rpc SetEnv(sliverpb.SetEnvReq) returns (sliverpb.SetEnv);
     rpc UnsetEnv(sliverpb.UnsetEnvReq) returns (sliverpb.UnsetEnv);

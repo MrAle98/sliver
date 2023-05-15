@@ -137,6 +137,7 @@ type SliverRPCClient interface {
 	StopService(ctx context.Context, in *sliverpb.StopServiceReq, opts ...grpc.CallOption) (*sliverpb.ServiceInfo, error)
 	RemoveService(ctx context.Context, in *sliverpb.RemoveServiceReq, opts ...grpc.CallOption) (*sliverpb.ServiceInfo, error)
 	MakeToken(ctx context.Context, in *sliverpb.MakeTokenReq, opts ...grpc.CallOption) (*sliverpb.MakeToken, error)
+	ListTokens(ctx context.Context, in *sliverpb.ListTokensReq, opts ...grpc.CallOption) (*sliverpb.ListTokens, error)
 	GetEnv(ctx context.Context, in *sliverpb.EnvReq, opts ...grpc.CallOption) (*sliverpb.EnvInfo, error)
 	SetEnv(ctx context.Context, in *sliverpb.SetEnvReq, opts ...grpc.CallOption) (*sliverpb.SetEnv, error)
 	UnsetEnv(ctx context.Context, in *sliverpb.UnsetEnvReq, opts ...grpc.CallOption) (*sliverpb.UnsetEnv, error)
@@ -1086,6 +1087,15 @@ func (c *sliverRPCClient) MakeToken(ctx context.Context, in *sliverpb.MakeTokenR
 	return out, nil
 }
 
+func (c *sliverRPCClient) ListTokens(ctx context.Context, in *sliverpb.ListTokensReq, opts ...grpc.CallOption) (*sliverpb.ListTokens, error) {
+	out := new(sliverpb.ListTokens)
+	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/ListTokens", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *sliverRPCClient) GetEnv(ctx context.Context, in *sliverpb.EnvReq, opts ...grpc.CallOption) (*sliverpb.EnvInfo, error) {
 	out := new(sliverpb.EnvInfo)
 	err := c.cc.Invoke(ctx, "/rpcpb.SliverRPC/GetEnv", in, out, opts...)
@@ -1593,6 +1603,7 @@ type SliverRPCServer interface {
 	StopService(context.Context, *sliverpb.StopServiceReq) (*sliverpb.ServiceInfo, error)
 	RemoveService(context.Context, *sliverpb.RemoveServiceReq) (*sliverpb.ServiceInfo, error)
 	MakeToken(context.Context, *sliverpb.MakeTokenReq) (*sliverpb.MakeToken, error)
+	ListTokens(context.Context, *sliverpb.ListTokensReq) (*sliverpb.ListTokens, error)
 	GetEnv(context.Context, *sliverpb.EnvReq) (*sliverpb.EnvInfo, error)
 	SetEnv(context.Context, *sliverpb.SetEnvReq) (*sliverpb.SetEnv, error)
 	UnsetEnv(context.Context, *sliverpb.UnsetEnvReq) (*sliverpb.UnsetEnv, error)
@@ -1933,6 +1944,9 @@ func (UnimplementedSliverRPCServer) RemoveService(context.Context, *sliverpb.Rem
 }
 func (UnimplementedSliverRPCServer) MakeToken(context.Context, *sliverpb.MakeTokenReq) (*sliverpb.MakeToken, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakeToken not implemented")
+}
+func (UnimplementedSliverRPCServer) ListTokens(context.Context, *sliverpb.ListTokensReq) (*sliverpb.ListTokens, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTokens not implemented")
 }
 func (UnimplementedSliverRPCServer) GetEnv(context.Context, *sliverpb.EnvReq) (*sliverpb.EnvInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEnv not implemented")
@@ -3804,6 +3818,24 @@ func _SliverRPC_MakeToken_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SliverRPC_ListTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(sliverpb.ListTokensReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SliverRPCServer).ListTokens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpcpb.SliverRPC/ListTokens",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SliverRPCServer).ListTokens(ctx, req.(*sliverpb.ListTokensReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SliverRPC_GetEnv_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(sliverpb.EnvReq)
 	if err := dec(in); err != nil {
@@ -4861,6 +4893,10 @@ var SliverRPC_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakeToken",
 			Handler:    _SliverRPC_MakeToken_Handler,
+		},
+		{
+			MethodName: "ListTokens",
+			Handler:    _SliverRPC_ListTokens_Handler,
 		},
 		{
 			MethodName: "GetEnv",
