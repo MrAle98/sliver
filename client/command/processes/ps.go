@@ -220,61 +220,119 @@ func procRow(tw table.Writer, proc *commonpb.Process, cmdLine bool, con *console
 	if beacon != nil && proc.Pid == beacon.PID {
 		color = console.Green
 	}
-
 	var row table.Row
-	switch session.GetOS() {
-	case "windows":
-		if cmdLine {
-			var args string
-			if len(proc.CmdLine) >= 1 {
-				args = strings.Join(proc.CmdLine, " ")
+	if session != nil {
+		switch session.GetOS() {
+		case "windows":
+			if cmdLine {
+				var args string
+				if len(proc.CmdLine) >= 1 {
+					args = strings.Join(proc.CmdLine, " ")
+				} else {
+					args = proc.Executable
+				}
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, args),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.SessionID),
+				}
 			} else {
-				args = proc.Executable
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Executable),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.SessionID),
+				}
 			}
-			row = table.Row{
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
-				fmt.Sprintf(color+"%s"+console.Normal, args),
-				fmt.Sprintf(color+"%d"+console.Normal, proc.SessionID),
-			}
-		} else {
-			row = table.Row{
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Executable),
-				fmt.Sprintf(color+"%d"+console.Normal, proc.SessionID),
+		case "darwin":
+			fallthrough
+		case "linux":
+			fallthrough
+		default:
+			if cmdLine {
+				var args string
+				if len(proc.CmdLine) >= 2 {
+					args = strings.Join(proc.CmdLine, " ")
+				} else {
+					args = proc.Executable
+				}
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, args),
+				}
+			} else {
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Executable),
+				}
 			}
 		}
-	case "darwin":
-		fallthrough
-	case "linux":
-		fallthrough
-	default:
-		if cmdLine {
-			var args string
-			if len(proc.CmdLine) >= 2 {
-				args = strings.Join(proc.CmdLine, " ")
+	} else if beacon != nil {
+		switch beacon.GetOS() {
+		case "windows":
+			if cmdLine {
+				var args string
+				if len(proc.CmdLine) >= 1 {
+					args = strings.Join(proc.CmdLine, " ")
+				} else {
+					args = proc.Executable
+				}
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, args),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.SessionID),
+				}
 			} else {
-				args = proc.Executable
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Executable),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.SessionID),
+				}
 			}
-			row = table.Row{
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
-				fmt.Sprintf(color+"%s"+console.Normal, args),
-			}
-		} else {
-			row = table.Row{
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
-				fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
-				fmt.Sprintf(color+"%s"+console.Normal, proc.Executable),
+		case "darwin":
+			fallthrough
+		case "linux":
+			fallthrough
+		default:
+			if cmdLine {
+				var args string
+				if len(proc.CmdLine) >= 2 {
+					args = strings.Join(proc.CmdLine, " ")
+				} else {
+					args = proc.Executable
+				}
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, args),
+				}
+			} else {
+				row = table.Row{
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Pid),
+					fmt.Sprintf(color+"%d"+console.Normal, proc.Ppid),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Owner),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Architecture),
+					fmt.Sprintf(color+"%s"+console.Normal, proc.Executable),
+				}
 			}
 		}
 	}
