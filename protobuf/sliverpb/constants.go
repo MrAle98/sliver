@@ -298,6 +298,12 @@ const (
 	MsgRportFwdListenersReq
 
 	MsgRPortfwdReq
+
+	MsgPivotPeerEnvelopeNoResponse // Not used by server just by intermediate pivots
+
+	MsgListTokensReq
+
+	MsgListTokens
 )
 
 // Constants to replace enums
@@ -524,6 +530,10 @@ func MsgNumber(request proto.Message) uint32 {
 		return MsgRportFwdListeners
 	case *RPortfwdReq:
 		return MsgRPortfwdReq
+	case *ListTokensReq:
+		return MsgListTokensReq
+	case *ListTokens:
+		return MsgListTokens
 	}
 	return uint32(0)
 }

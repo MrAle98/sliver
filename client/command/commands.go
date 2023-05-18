@@ -2092,6 +2092,22 @@ func BindCommands(con *console.SliverConsoleClient) {
 	// [ Privileges ] ---------------------------------------------
 
 	con.App.AddCommand(&grumble.Command{
+		Name:     consts.ListTokensStr,
+		Help:     "List available windows access tokens (Windows Only)",
+		LongHelp: help.GetHelpFor([]string{consts.ListTokensStr}),
+		Flags: func(f *grumble.Flags) {
+			f.Int("t", "timeout", 30, "command timeout in seconds")
+		},
+		Run: func(ctx *grumble.Context) error {
+			con.Println()
+			privilege.ListTokensCmd(ctx, con)
+			con.Println()
+			return nil
+		},
+		HelpGroup: consts.SliverWinHelpGroup,
+	})
+
+	con.App.AddCommand(&grumble.Command{
 		Name:     consts.RunAsStr,
 		Help:     "Run a new process in the context of the designated user (Windows Only)",
 		LongHelp: help.GetHelpFor([]string{consts.RunAsStr}),

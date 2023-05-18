@@ -21,6 +21,8 @@ package privilege
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/bishopfox/sliver/client/command/settings"
 	"github.com/bishopfox/sliver/client/console"
@@ -44,7 +46,7 @@ var TokenTypeMap = map[int32]string{
 }
 
 // ImpersonateCmd - Windows only, impersonate a user token
-func listTokensCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
+func ListTokensCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
 	session, beacon := con.ActiveTarget.GetInteractive()
 	if session == nil && beacon == nil {
 		return
@@ -73,6 +75,26 @@ func listTokensCmd(ctx *grumble.Context, con *console.SliverConsoleClient) {
 	}
 }
 
+func filterTokens(tokens []*sliverpb.Token) []*sliverpb.Token {
+	var filtered []*sliverpb.Token
+
+	for _, t := range tokens {
+
+		if strings.Contains(t.Username, "DWM-") || strings.Contains(t.Username, "LOCAL SERVICE") {
+
+		}
+	}
+	return filtered
+}
+
+// Sort SortTokensByPrivilegeCount - Sorts a list of tokens based on the number of privileges associated to a token
+func SortTokensByPrivilegeCount(tokens []*sliverpb.Token) []*sliverpb.Token {
+	sort.Slice(tokens, func(i, j int) bool {
+		return tokens[i].PrivilegesCount < tokens[j].PrivilegesCount
+	})
+	return tokens
+}
+
 // PrintTokens - Prints available tokens
 func PrintTokens(listTokens *sliverpb.ListTokens, ctx *grumble.Context, con *console.SliverConsoleClient) {
 
@@ -99,13 +121,13 @@ func tokenRow(tw table.Writer, token *sliverpb.Token, con *console.SliverConsole
 	var TokenImpLevel string
 
 	if token.TokenType == 1 {
-		if token.TokenIntegrity >= 0x1000 && token.TokenIntegrity <= 0x2000 {
+		if token.TokenIntegrity >= 0x1000 && token.TokenIntegrity < 0x2000 {
 			integrityLevel = "LOW"
-		} else if token.TokenIntegrity >= 0x2000 && token.TokenIntegrity <= 0x3000 {
+		} else if token.TokenIntegrity >= 0x2000 && token.TokenIntegrity < 0x3000 {
 			integrityLevel = "MEDIUM"
-		} else if token.TokenIntegrity >= 0x3000 && token.TokenIntegrity <= 0x4000 {
+		} else if token.TokenIntegrity >= 0x3000 && token.TokenIntegrity < 0x4000 {
 			integrityLevel = "HIGH"
-		} else if token.TokenIntegrity >= 0x4000 && token.TokenIntegrity <= 0x5000 {
+		} else if token.TokenIntegrity >= 0x4000 && token.TokenIntegrity < 0x5000 {
 			integrityLevel = "SYSTEM"
 		}
 		TokenImpLevel = ""

@@ -190,6 +190,7 @@ const (
 
 	ProcdumpStr         = "procdump"
 	ImpersonateStr      = "impersonate"
+	ListTokensStr       = "list-tokens"
 	RunAsStr            = "runas"
 	ElevateStr          = "elevate"
 	GetSystemStr        = "getsystem"

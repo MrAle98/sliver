@@ -65,6 +65,7 @@ var (
 		consts.ElevateStr:          elevateHelp,
 		consts.RunAsStr:            runAsHelp,
 		consts.ImpersonateStr:      impersonateHelp,
+		consts.ListTokensStr:       listTokensHelp,
 		consts.RevToSelfStr:        revToSelfHelp,
 		consts.ExecuteAssemblyStr:  executeAssemblyHelp,
 		consts.ExecuteShellcodeStr: executeShellcodeHelp,
@@ -316,6 +317,9 @@ On Windows, escaping is disabled. Instead, '\\' is treated as path separator.`
 
 	impersonateHelp = `[[.Bold]]Command:[[.Normal]] impersonate USERNAME
 [[.Bold]]About:[[.Normal]] (Windows Only) Steal the token of a logged in user. Sliver commands that run new processes (like [[.Bold]]shell[[.Normal]] or [[.Bold]]execute-command[[.Normal]]) will impersonate this user.`
+
+	listTokensHelp = `[[.Bold]]Command:[[.Normal]] list-tokens
+[[.Bold]]About:[[.Normal]] (Windows Only) List available access tokens of currently logged in users. Sliver commands [[.Bold]]impersonate[[.Normal]] can be used in order to impersonate access token with a given tokenID, available in the list.`
 
 	revToSelfHelp = `[[.Bold]]Command:[[.Normal]] rev2self
 [[.Bold]]About:[[.Normal]] (Windows Only) Call RevertToSelf, lose the stolen token.`
