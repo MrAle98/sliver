@@ -181,6 +181,10 @@ func handleBuildEvent(externalBuilder *clientpb.Builder, event *clientpb.Event, 
 		fPath, err = generate.SliverExecutable(extConfig.Config.Name, extConfig.OTPSecret, extModel, false)
 	case clientpb.OutputFormat_SHARED_LIB:
 		fPath, err = generate.SliverSharedLibrary(extConfig.Config.Name, extConfig.OTPSecret, extModel, false)
+	case clientpb.OutputFormat_DOTNET:
+		fPath, err = generate.SliverSharedLibrary(extConfig.Config.Name, extConfig.OTPSecret, extModel, false)
+	case clientpb.OutputFormat_POWERSHELL:
+		fPath, err = generate.SliverSharedLibrary(extConfig.Config.Name, extConfig.OTPSecret, extModel, false)
 	case clientpb.OutputFormat_SHELLCODE:
 		fPath, err = generate.SliverShellcode(extConfig.Config.Name, extConfig.OTPSecret, extModel, false)
 	default:
