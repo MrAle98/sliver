@@ -317,7 +317,8 @@ func convertToAssembly(in string) string {
 // command for thread execution: powershell -t pe2sh -o C:\temp\b.ps1 -e xor -e base64 C:\temp\MemoryModulePP\x64\Release\loader.raw
 func convertToPowershell(in string) string {
 	outfile := "C:\\temp\\a.ps1"
-	command := fmt.Sprintf("powershell.exe -c cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py  powershell  -o %s -t loader -T .\\templates\\public\\powershell\\code_execution\\assembly_load.ps1 %s", outfile, in)
+	in += ".raw"
+	command := fmt.Sprintf("powershell.exe -c cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py  powershell -t pe2sh  -o %s -e xor -e base64 -T .\\templates\\public\\powershell\\code_execution\\classic.ps1 %s", outfile, in)
 	out, _ := exec.Command("powershell.exe", "-c", command).Output()
 	outstring := string(out)
 	println(outstring)
