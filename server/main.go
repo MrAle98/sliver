@@ -42,7 +42,7 @@ func init() {
 }
 
 func main() {
-	a := generate.ApplyTransform("dotnet", "C:\\Users\\Administrator\\.sliver\\slivers\\windows\\amd64\\MAMMOTH_NEOLOGISM\\bin\\MAMMOTH_NEOLOGISM.dll")
+	//a := generate.ApplyTransform("dotnet", "C:\\Users\\Administrator\\.sliver\\slivers\\windows\\amd64\\MAMMOTH_NEOLOGISM\\bin\\MAMMOTH_NEOLOGISM.dll")
 	//a := convertToLoadable("C:\\Users\\Administrator\\.sliver\\slivers\\windows\\amd64\\MAMMOTH_NEOLOGISM\\bin\\MAMMOTH_NEOLOGISM.dll")
 	fmt.Println(a)
 	cli.Execute()

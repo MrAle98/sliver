@@ -307,7 +307,7 @@ func convertToLoadable(filepath string) string {
 
 func convertToAssembly(in string) string {
 	outfile := "C:\\temp\\a.exe"
-	command := fmt.Sprintf("cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py dotnet -t loader -e base64 -o %s %s", outfile, in)
+	command := fmt.Sprintf("cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py dotnet -t loader -e xor -e base64 -o %s %s", outfile, in)
 	out, _ := exec.Command("powershell.exe", "-c", command).Output()
 	outstring := string(out)
 	println(outstring)
@@ -330,8 +330,7 @@ func ApplyTransform(transform string, filepath string) string {
 	out := ""
 	if transform == "powershell" {
 		loader := convertToLoadable(filepath)
-		asm := convertToAssembly(loader)
-		psh := convertToPowershell(asm)
+		psh := convertToPowershell(loader)
 		out = psh
 	} else if transform == "dotnet" {
 		loader := convertToLoadable(filepath)
