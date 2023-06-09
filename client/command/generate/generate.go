@@ -176,6 +176,10 @@ func nameOfOutputFormat(value clientpb.OutputFormat) string {
 		return "Service"
 	case clientpb.OutputFormat_SHARED_LIB:
 		return "Shared Library"
+	case clientpb.OutputFormat_DOTNET:
+		return "Dotnet"
+	case clientpb.OutputFormat_POWERSHELL:
+		return "Powershell"
 	case clientpb.OutputFormat_SHELLCODE:
 		return "Shellcode"
 	default:
@@ -293,6 +297,14 @@ func parseCompileFlags(ctx *grumble.Context, con *console.SliverConsoleClient) *
 	case "service":
 		configFormat = clientpb.OutputFormat_SERVICE
 		isService = true
+	case "dotnet":
+		configFormat = clientpb.OutputFormat_DOTNET
+		isSharedLib = true
+		runAtLoad = ctx.Flags.Bool("run-at-load")
+	case "powershell":
+		configFormat = clientpb.OutputFormat_POWERSHELL
+		isSharedLib = true
+		runAtLoad = ctx.Flags.Bool("run-at-load")
 	default:
 		// Default to exe
 		configFormat = clientpb.OutputFormat_EXECUTABLE
@@ -304,7 +316,7 @@ func parseCompileFlags(ctx *grumble.Context, con *console.SliverConsoleClient) *
 	if targetOS == "" || targetArch == "" {
 		return nil
 	}
-	if configFormat == clientpb.OutputFormat_SHELLCODE && targetOS != "windows" {
+	if (configFormat == clientpb.OutputFormat_SHELLCODE || configFormat == clientpb.OutputFormat_POWERSHELL || configFormat == clientpb.OutputFormat_DOTNET) && targetOS != "windows" {
 		con.PrintErrorf("Shellcode format is currently only supported on Windows\n")
 		return nil
 	}

@@ -133,7 +133,7 @@ func tokenRow(tw table.Writer, token *sliverpb.Token, con *console.SliverConsole
 		TokenImpLevel = ""
 	} else {
 		integrityLevel = ""
-		TokenImpLevel = TokenTypeMap[token.TokenImpLevel]
+		TokenImpLevel = ImpLevelMap[token.TokenImpLevel]
 	}
 
 	row = table.Row{
