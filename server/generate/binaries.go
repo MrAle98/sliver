@@ -317,9 +317,13 @@ func convertToAssembly(in string) string {
 // command for thread execution: powershell -t pe2sh -o C:\temp\b.ps1 -e xor -e base64 C:\temp\MemoryModulePP\x64\Release\loader.raw
 func convertToPowershell(in string) string {
 	outfile := "C:\\temp\\a.ps1"
-	in += ".raw"
-	command := fmt.Sprintf("powershell.exe -c cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py  powershell -t pe2sh  -o %s -e xor -e base64 -T .\\templates\\public\\powershell\\code_execution\\classic.ps1 %s", outfile, in)
-	out, _ := exec.Command("powershell.exe", "-c", command).Output()
+	os.Rename(in, in+".raw")
+
+	command := fmt.Sprintf("cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py  powershell -t pe2sh  -o %s -e xor -e base64 -T .\\templates\\public\\powershell\\code_execution\\classic.ps1 %s", outfile, in+".raw")
+	out, err := exec.Command("powershell.exe", "-c", command).Output()
+	if err != nil {
+		println(err.Error())
+	}
 	outstring := string(out)
 	println(outstring)
 	return outfile
@@ -475,13 +479,13 @@ func SliverSharedLibrary(name string, otpSecret string, config *models.ImplantCo
 	out, err := exec.Command("cmd.exe", "/c", command).Output()
 	outstring := string(out)
 	re := regexp.MustCompile(`Build files have been written to: (.*)`)
-	re2 := regexp.MustCompile(`Linking CXX shared library (.*)`)
+	//re2 := regexp.MustCompile(`Linking CXX shared library (.*)`)
 	matches := re.FindAllStringSubmatch(outstring, -1)
 	out_basepath := strings.Trim(strings.Replace(matches[0][1], "/", "\\", -1), "\r\n")
-	matches = re2.FindAllStringSubmatch(outstring, -1)
-	outfilename := strings.Trim(matches[0][1], "\r\n")
+	// matches = re2.FindAllStringSubmatch(outstring, -1)
+	// outfilename := strings.Trim(matches[0][1], "\r\n")
 	out_basepath += "\\"
-	out_basepath += outfilename
+	out_basepath += "Sliver-CPPImplant2.dll"
 
 	filename := out_basepath
 	input, err := os.ReadFile(filename)
@@ -548,13 +552,13 @@ func SliverExecutable(name string, otpSecret string, config *models.ImplantConfi
 	outstring := string(out)
 	//fmt.Print(outstring)
 	re := regexp.MustCompile(`Build files have been written to: (.*)`)
-	re2 := regexp.MustCompile(`Linking CXX executable (.*)`)
+	//re2 := regexp.MustCompile(`Linking CXX executable (.*)`)
 	matches := re.FindAllStringSubmatch(outstring, -1)
 	out_basepath := strings.Trim(strings.Replace(matches[0][1], "/", "\\", -1), "\r\n")
-	matches = re2.FindAllStringSubmatch(outstring, -1)
-	outfilename := strings.Trim(matches[0][1], "\r\n")
+	// matches = re2.FindAllStringSubmatch(outstring, -1)
+	// outfilename := strings.Trim(matches[0][1], "\r\n")
 	out_basepath += "\\"
-	out_basepath += outfilename
+	out_basepath += "Sliver-CPPImplant2.exe"
 
 	filename := out_basepath
 	input, err := os.ReadFile(filename)
