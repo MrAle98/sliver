@@ -319,7 +319,7 @@ func convertToPowershell(in string) string {
 	outfile := "C:\\temp\\a.ps1"
 	os.Rename(in, in+".raw")
 
-	command := fmt.Sprintf("cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py  powershell -t pe2sh  -o %s -e xor -e base64 -T .\\templates\\public\\powershell\\code_execution\\classic.ps1 %s", outfile, in+".raw")
+	command := fmt.Sprintf("cd C:\\temp\\inceptor\\inceptor; .\\venv\\Scripts\\activate.ps1; cd inceptor; python.exe .\\inceptor.py  powershell -t loader  -o %s -e xor -e base64 -T .\\templates\\public\\powershell\\code_execution\\assembly_load.ps1 %s", outfile, in)
 	out, err := exec.Command("powershell.exe", "-c", command).Output()
 	if err != nil {
 		println(err.Error())
@@ -334,7 +334,8 @@ func ApplyTransform(transform string, filepath string) string {
 	out := ""
 	if transform == "powershell" {
 		loader := convertToLoadable(filepath)
-		psh := convertToPowershell(loader)
+		asm := convertToAssembly(loader)
+		psh := convertToPowershell(asm)
 		out = psh
 	} else if transform == "dotnet" {
 		loader := convertToLoadable(filepath)
@@ -672,6 +673,7 @@ func renderSliverGoCode(name string, otpSecret string, config *models.ImplantCon
 			buildLog.Errorf("Template parsing error %s", err)
 			return err
 		}
+
 		err = sliverCodeTmpl.Execute(buf, struct {
 			Name                string
 			Config              *models.ImplantConfig
