@@ -269,4 +269,8 @@ service SliverRPC {
 
   // *** Events ***
   rpc Events(commonpb.Empty) returns (stream clientpb.Event);
+
+  // *** Hello World ***
+  rpc HelloWorld(sliverpb.HelloWorldReq) returns (sliverpb.HelloWorld);
+
 }

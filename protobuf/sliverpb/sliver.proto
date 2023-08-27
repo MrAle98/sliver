@@ -1244,3 +1244,17 @@ message ExecWasmExtension {
 
   commonpb.Response Response = 9;
 }
+
+message HelloWorldReq {
+  string param1 = 1;
+  int param2 = 2;
+  bool param3 = 3;
+
+  commonpb.Request Request = 9;
+}
+
+message HelloWorld {
+  string output = 1;
+
+  commonpb.Response Response = 9;
+}
