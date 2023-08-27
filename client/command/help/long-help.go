@@ -76,6 +76,7 @@ var (
 		consts.PsExecStr:           psExecHelp,
 		consts.BackdoorStr:         backdoorHelp,
 		consts.SpawnDllStr:         spawnDllHelp,
+		consts.HelloWorldStr:       helloWorldHelp,
 
 		consts.WebsitesStr:                  websitesHelp,
 		consts.ScreenshotStr:                screenshotHelp,
@@ -353,6 +354,9 @@ Shellcode files should be binary encoded, you can generate Sliver shellcode file
 
 	migrateHelp = `[[.Bold]]Command:[[.Normal]] migrate <pid>
 [[.Bold]]About:[[.Normal]] (Windows Only) Migrates into the process designated by <pid>.`
+
+	helloWorldHelp = `[[.Bold]]Command:[[.Normal]] helloworld -X <param1> <param2>
+	[[.Bold]]About:[[.Normal]] Hello World command`
 
 	websitesHelp = `[[.Bold]]Command:[[.Normal]] websites <options> <operation>
 [[.Bold]]About:[[.Normal]] Add content to HTTP(S) C2 websites to make them look more legit.

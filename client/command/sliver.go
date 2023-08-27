@@ -35,6 +35,7 @@ import (
 	"github.com/bishopfox/sliver/client/command/extensions"
 	"github.com/bishopfox/sliver/client/command/filesystem"
 	"github.com/bishopfox/sliver/client/command/generate"
+	"github.com/bishopfox/sliver/client/command/helloworld"
 	"github.com/bishopfox/sliver/client/command/help"
 	"github.com/bishopfox/sliver/client/command/info"
 	"github.com/bishopfox/sliver/client/command/kill"
@@ -995,6 +996,27 @@ func SliverCommands(con *client.SliverConsoleClient) console.Commands {
 		memfilesCmd.AddCommand(memfilesRmCmd)
 
 		carapace.Gen(memfilesRmCmd).PositionalCompletion(carapace.ActionValues().Usage("memfile file descriptor"))
+
+		// [ Hello World] ------------------------------------------
+		helloWorldCmd := &cobra.Command{
+			Use:   consts.HelloWorldStr,
+			Short: "Hello World command",
+			Long:  help.GetHelpFor([]string{consts.HelloWorldStr}),
+			Args:  cobra.ExactArgs(1),
+			Run: func(cmd *cobra.Command, args []string) {
+				helloworld.HelloWorldCmd(cmd, con, args)
+			},
+			GroupID: consts.FilesystemHelpGroup,
+		}
+		sliver.AddCommand(helloWorldCmd)
+		Flags("", false, helloWorldCmd, func(f *pflag.FlagSet) {
+			f.Uint32P("intflag", "i", 0, "parameter 2")
+			f.BoolP("boolflag", "x", false, "parameter 3")
+			f.Int64P("timeout", "t", defaultTimeout, "grpc timeout in seconds")
+		})
+		carapace.Gen(helloWorldCmd).PositionalCompletion(
+			carapace.ActionValues().Usage("parameter1"),
+		)
 
 		// [ Network ] ---------------------------------------------
 

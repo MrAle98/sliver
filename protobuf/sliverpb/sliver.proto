@@ -1247,7 +1247,7 @@ message ExecWasmExtension {
 
 message HelloWorldReq {
   string param1 = 1;
-  int param2 = 2;
+  uint32 param2 = 2;
   bool param3 = 3;
 
   commonpb.Request Request = 9;

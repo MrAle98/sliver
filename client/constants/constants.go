@@ -143,7 +143,7 @@ const (
 	SettingsStr        = "settings"
 	SearchStr          = "search"
 	TrafficEncodersStr = "traffic-encoders"
-
+	HelloWorldStr      = "helloworld"
 	// Generic
 
 	// NewStr - "new"
