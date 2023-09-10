@@ -339,6 +339,9 @@ const (
 	// MsgCp - Confirms the success/failure, as well as the total number of bytes
 	// written of the cp request (resp to MsgCpReq)
 	MsgCp
+
+	//MsgHelloWorldReq
+	MsgHelloWorldReq
 )
 
 // Constants to replace enums
@@ -601,7 +604,8 @@ func MsgNumber(request proto.Message) uint32 {
 		return MsgListWasmExtensionsReq
 	case *ExecWasmExtensionReq:
 		return MsgExecWasmExtensionReq
-
+	case *HelloWorldReq:
+		return MsgHelloWorldReq
 	}
 	return uint32(0)
 }

@@ -329,7 +329,7 @@ func cpHandler(data []byte, resp RPCResponse) {
 		return
 	}
 	defer srcFile.Close()
-	
+
 	dstFile, err := os.Create(cpReq.Dst)
 	if err != nil {
 		// {{if .Config.Debug}}
@@ -342,7 +342,7 @@ func cpHandler(data []byte, resp RPCResponse) {
 		return
 	}
 	defer dstFile.Close()
-	
+
 	bytesWritten, err := io.Copy(dstFile, srcFile)
 	if err != nil {
 		// {{if .Config.Debug}}
@@ -443,6 +443,33 @@ func pwdHandler(data []byte, resp RPCResponse) {
 	}
 
 	data, err = proto.Marshal(pwd)
+	resp(data, err)
+}
+
+func helloWorldHandler(data []byte, resp RPCResponse) {
+	helloworldReq := &sliverpb.HelloWorldReq{}
+	err := proto.Unmarshal(data, helloworldReq)
+
+	if err != nil {
+		//
+		log.Printf("error decoding message: %v", err)
+		//
+		return
+	}
+	//
+	helloworldResp := &sliverpb.HelloWorld{}
+	p3 := ""
+	if helloworldReq.Param3 {
+		p3 = "FALSE"
+	} else {
+		p3 = "TRUE"
+	}
+	helloworldResp.Output = fmt.Sprintf("I'm your implant and i received the following:\nparam1: %s\nparam2: %d\nparam3: %s",
+		helloworldReq.Param1, helloworldReq.Param2, p3)
+
+	//log.Printf("ping id = %d", ping.Nonce)
+	//
+	data, err = proto.Marshal(helloworldResp)
 	resp(data, err)
 }
 

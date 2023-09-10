@@ -28,6 +28,7 @@ package handlers
 
 import (
 	"os"
+
 	"github.com/bishopfox/sliver/protobuf/sliverpb"
 )
 
@@ -54,6 +55,8 @@ var (
 		sliverpb.MsgRegisterWasmExtensionReq:   registerWasmExtensionHandler,
 		sliverpb.MsgDeregisterWasmExtensionReq: deregisterWasmExtensionHandler,
 		sliverpb.MsgListWasmExtensionsReq:      listWasmExtensionsHandler,
+
+		sliverpb.MsgHelloWorldReq: helloWorldHandler,
 	}
 )
 
@@ -68,11 +71,11 @@ func GetSystemPivotHandlers() map[uint32]TunnelHandler {
 }
 
 // Stub
-func getUid(fileInfo os.FileInfo) (string) {
+func getUid(fileInfo os.FileInfo) string {
 	return ""
 }
 
 // Stub
-func getGid(fileInfo os.FileInfo) (string) {
+func getGid(fileInfo os.FileInfo) string {
 	return ""
 }

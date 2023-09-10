@@ -95,6 +95,8 @@ var (
 		sliverpb.MsgMemfilesListReq: memfilesListHandler,
 		sliverpb.MsgMemfilesAddReq:  memfilesAddHandler,
 		sliverpb.MsgMemfilesRmReq:   memfilesRmHandler,
+
+		sliverpb.MsgHelloWorldReq: helloWorldHandler,
 	}
 )
 

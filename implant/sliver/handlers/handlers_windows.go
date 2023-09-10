@@ -122,6 +122,8 @@ var (
 		sliverpb.MsgWGStopSocksReq:      wgStopSocksHandler,
 		sliverpb.MsgWGListSocksReq:      wgListSocksServersHandler,
 		// {{end}}
+
+		sliverpb.MsgHelloWorldReq: helloWorldHandler,
 	}
 )
 
